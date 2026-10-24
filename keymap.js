@@ -45,6 +45,7 @@
 		"g g": { callback: () => scrollToPosition(0) },
 		"shift+g": { callback: () => scrollToPosition(1) },
 
+		// History back/forward on alt, "shift+l" opens the full library page
 		"shift+h": { callback: () => Spicetify.Platform.History.goBack() },
 		"shift+l": { callback: () => Spicetify.Platform.History.push("/library") },
 		"alt+h": { callback: () => Spicetify.Platform.History.goBack() },
@@ -95,27 +96,40 @@
 	const helpOpen = {};
 
 	function buildHelp() {
-		const rows = [
-			["d / u", "Scroll half a page"],
-			["j / k", "Scroll lines"],
-			["g g / Shift+g", "Top / bottom"],
-			["n / p", "Next / previous track"],
-			["a / m", "Like current track"],
-			["s", "Toggle shuffle"],
-			["l", "Toggle repeat"],
-			["f", "Toggle lyrics"],
-			["q", "Toggle queue panel"],
-			["h", "Go home"],
-			["Shift+h / Shift+l", "History back / forward"],
-			["Alt+h / Alt+l", "History back / forward"],
-			["Ctrl+b", "Toggle library sidebar"],
-			["Ctrl+Shift+b", "Toggle now playing view"],
-			["Ctrl+ ←/→", "Previous / next track"],
-			["Ctrl+ ↑/↓", "Volume -/+"],
-			["Ctrl+Tab", "Cycle sidebar items"],
-			["Shift+f", "Click-on-element vim mode"],
-			["/", "Search page"],
-			["Ctrl+q", "Quit Spotify"],
+		const sections = [
+			["Scrolling", [
+				["j / k", "Scroll lines"],
+				["d / u", "Scroll half a page"],
+				["Ctrl+d / Ctrl+u", "Scroll half a page"],
+				["g g / Shift+g", "Top / bottom"],
+			]],
+			["Playback", [
+				["n / p", "Next / previous track"],
+				["a / m", "Like current track"],
+				["s", "Toggle shuffle"],
+				["l", "Toggle repeat"],
+				["Ctrl+ ←/→", "Previous / next track"],
+				["Ctrl+ ↑/↓", "Volume -/+"],
+			]],
+			["Navigation", [
+				["h", "Go home"],
+				["/", "Search page"],
+				["q", "Toggle queue panel"],
+				["Shift+l", "Open Your Library (full page)"],
+				["Alt+h / Alt+l", "History back / forward"],
+				["Shift+h", "History back"],
+			]],
+			["Panels", [
+				["Ctrl+b", "Toggle library sidebar"],
+				["Ctrl+Shift+b", "Toggle now playing view"],
+				["f", "Toggle lyrics"],
+			]],
+			["Other", [
+				["Shift+f", "Click-on-element vim mode"],
+				["?", "Open this help"],
+				["Esc", "Close modal / menu, unfocus field"],
+				["Ctrl+q", "Quit Spotify"],
+			]],
 		];
 		const panel = document.createElement("div");
 		panel.id = "keymap-help";
@@ -125,13 +139,15 @@
 		#keymap-help .o-panel { background: var(--spice-card); color: var(--spice-text); border-radius: var(--br-1); width: 420px; max-height: 75vh; padding: 20px 24px; display: flex; flex-direction: column; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
 		#keymap-help .o-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: var(--spice-text); }
 		#keymap-help .o-help-body { overflow-y: auto; min-height: 0; scrollbar-width: none; }
-		#keymap-help .o-row { display: flex; justify-content: space-between; gap: 24px; padding: 5px 0; font-size: 13.5px; align-items: center; }
+		#keymap-help .o-section { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--spice-subtext); margin: 12px 0 2px; }
+		#keymap-help .o-section:first-child { margin-top: 0; }
+		#keymap-help .o-row { display: flex; justify-content: space-between; gap: 24px; padding: 4px 0; font-size: 13.5px; align-items: center; }
 		#keymap-help .o-keys { color: var(--spice-button); white-space: nowrap; font-weight: 600; }
 		#keymap-help .o-desc { color: var(--spice-subtext); text-align: right; }
 		</style>
 		<div class="o-overlay"><div class="o-panel"><div class="o-title">Keybinds</div>
 		<div class="o-help-body">
-		${rows.map(([k, d]) => `<div class="o-row"><span class="o-keys">${k}</span><span class="o-desc">${d}</span></div>`).join("")}
+		${sections.map(([title, rows]) => `<div class="o-section">${title}</div>${rows.map(([k, d]) => `<div class="o-row"><span class="o-keys">${k}</span><span class="o-desc">${d}</span></div>`).join("")}`).join("")}
 		</div></div></div>`;
 		document.body.append(panel);
 		return panel;
@@ -257,11 +273,9 @@
 	// toggle buttons: clicking an already-visible one collapses it.
 	function toggleSidebar(side) {
 		if (side === 0) {
-			// When expanded: the X-collapse button inside the panel header.
-			// When collapsed: the small "Open Your Library" launcher.
-			// the panel swaps the button per state and carries the action in
-			// its aria-label: "Collapse Your Library" when expanded, "Open
-			// Your Library" when collapsed
+			// the panel has separate buttons per state and hoists their labels
+			// into aria-label: "Collapse Your Library" when expanded, "Open Your
+			// Library" when collapsed
 			document.querySelector("button[aria-label='Collapse Your Library'], button[aria-label='Open Your Library']")?.click();
 		} else {
 			document.querySelector('.main-coverSlotCollapsed-container button, button[aria-label="Now playing view"]')?.click();

@@ -20,26 +20,42 @@ spicetify apply
 | Key | Action |
 |---|---|
 | `?` | help modal (Spotify's native shortcuts modal is suppressed) |
-| `Esc` | close the help modal, or unfocus a search / text field |
+| `Esc` | close the help modal, menus, or unfocus a search / text field |
+
+Scrolling:
+
+| Key | Action |
+|---|---|
 | `d` / `u` | scroll half a page down/up (throttled while held) |
 | `Ctrl+d` / `Ctrl+u` | scroll half a page down/up |
 | `j` / `k` | scroll lines |
 | `g g` / `Shift+g` | jump to top / bottom |
+
+Playback:
+
+| Key | Action |
+|---|---|
 | `n` / `p` | next / previous track |
 | `a` / `m` | like current track |
 | `s` | toggle shuffle |
 | `l` | toggle repeat |
-| `f` | toggle lyrics |
-| `q` | toggle queue panel |
-| `h` | home |
-| `Alt+h` / `Alt+l` | history back / forward |
-| `Shift+l` | open Your Library (full page) |
-| `Ctrl+b` | toggle library sidebar |
-| `Ctrl+Shift+b` | toggle now playing view |
 | `Ctrl+ ←/→` | previous / next track |
 | `Ctrl+ ↑/↓` | volume −/+ |
-| `Shift+f` | vim overlay: letter labels on every clickable element (`Esc` to quit) |
+
+Navigation / panels:
+
+| Key | Action |
+|---|---|
+| `h` | home |
 | `/` | open search page |
+| `q` | toggle queue panel |
+| `Shift+l` | open Your Library (full page) |
+| `Alt+h` / `Alt+l` | history back / forward |
+| `Shift+h` | history back |
+| `f` | toggle lyrics |
+| `Ctrl+b` | toggle library sidebar |
+| `Ctrl+Shift+b` | toggle now playing view |
+| `Shift+f` | vim overlay: letter labels on every clickable element (`Esc` to quit) |
 | `Ctrl+q` | quit Spotify |
 
 While the help modal is open, `j`/`k`, `d`/`u` and `g g`/`Shift+g` scroll the
