@@ -135,14 +135,14 @@
 		panel.id = "keymap-help";
 		panel.innerHTML = `
 		<style>
-		#keymap-help .o-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; z-index: 99999; }
-		#keymap-help .o-panel { background: var(--spice-card); color: var(--spice-text); border-radius: var(--br-1); width: 420px; max-height: 75vh; padding: 20px 24px; display: flex; flex-direction: column; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
-		#keymap-help .o-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: var(--spice-text); }
-		#keymap-help .o-help-body { overflow-y: auto; min-height: 0; scrollbar-width: none; }
-		#keymap-help .o-section { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--spice-subtext); margin: 12px 0 2px; }
+		#keymap-help .o-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 99999; }
+		#keymap-help .o-panel { background: var(--spice-card); color: var(--spice-text); border-radius: 12px; width: 540px; height: min(720px, 82vh); padding: 24px 28px; display: flex; flex-direction: column; box-shadow: 0 16px 48px rgba(0,0,0,.55); }
+		#keymap-help .o-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--spice-text); }
+		#keymap-help .o-help-body { overflow-y: auto; flex: 1 1 auto; padding-right: 6px; scrollbar-width: none; }
+		#keymap-help .o-section { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--spice-subtext); margin: 16px 0 6px; }
 		#keymap-help .o-section:first-child { margin-top: 0; }
-		#keymap-help .o-row { display: flex; justify-content: space-between; gap: 24px; padding: 4px 0; font-size: 13.5px; align-items: center; }
-		#keymap-help .o-keys { color: var(--spice-button); white-space: nowrap; font-weight: 600; }
+		#keymap-help .o-row { display: flex; justify-content: space-between; gap: 24px; padding: 5px 0; font-size: 14px; align-items: center; }
+		#keymap-help .o-keys { background: rgba(255,255,255,.08); border-radius: 4px; padding: 3px 10px; color: var(--spice-text); white-space: nowrap; font-weight: 600; font-size: 12.5px; }
 		#keymap-help .o-desc { color: var(--spice-subtext); text-align: right; }
 		</style>
 		<div class="o-overlay"><div class="o-panel"><div class="o-title">Keybinds</div>
