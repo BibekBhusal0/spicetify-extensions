@@ -47,7 +47,7 @@
 
 		// History back/forward on alt, "shift+l" opens the full library page
 		"shift+h": { callback: () => Spicetify.Platform.History.goBack() },
-		"shift+l": { callback: () => Spicetify.Platform.History.push("/library") },
+		"shift+l": { callback: () => openLibraryPage() },
 		"alt+h": { callback: () => Spicetify.Platform.History.goBack() },
 		"alt+l": { callback: () => Spicetify.Platform.History.goForward() },
 
@@ -267,6 +267,23 @@
 	function scrollToPosition(position) {
 		const app = scrollTarget();
 		app.scroll(0, position === 0 ? 0 : app.scrollHeight);
+	}
+
+	// The full-page library is not a route (/library pushes a blank page) —
+	// it is the library sidebar blown up to full width by its own expand
+	// button. That button only exists while the sidebar is expanded, so
+	// bring the collapsed bar back first.
+	function openLibraryPage() {
+		const expand = document.querySelector('button[aria-label="Expand Your Library"]');
+		if (expand) {
+			expand.click();
+			return;
+		}
+		const open = document.querySelector("button[aria-label='Open Your Library']");
+		if (open) {
+			open.click();
+			setTimeout(() => document.querySelector('button[aria-label="Expand Your Library"]')?.click(), 250);
+		}
 	}
 
 	// 0 = library sidebar (left), 1 = now playing view (right). Both are plain
