@@ -22,7 +22,8 @@ spicetify apply
 | `?` | help modal (Spotify's native shortcuts modal is suppressed) |
 | `Esc` | close the help modal, or unfocus a search / text field |
 | `d` / `u` | scroll half a page down/up (throttled while held) |
-| `j` / `k` | scroll continuously while held |
+| `Ctrl+d` / `Ctrl+u` | scroll half a page down/up |
+| `j` / `k` | scroll lines |
 | `g g` / `Shift+g` | jump to top / bottom |
 | `n` / `p` | next / previous track |
 | `a` / `m` | like current track |

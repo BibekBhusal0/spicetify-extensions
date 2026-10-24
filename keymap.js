@@ -32,12 +32,15 @@
 		"shift+pageup": { callback: () => focusOnApp() },
 		"shift+pagedown": { callback: () => focusOnApp() },
 
-		// d/u scroll half a page per press; j/k scroll 25px continuously (hold);
-		// both target the help modal instead of the main view while it is open
-		j: { callback: () => createScrollCallback(SCROLL_STEP) },
-		k: { callback: () => createScrollCallback(-SCROLL_STEP) },
+		// Scroll actions: d/u (bare and with ctrl) jump half a page per press
+		// with key-repeat throttled to 120ms, j/k step 25px per repeat keydown,
+		// and all of them hit the help modal while it is open
+		j: { callback: () => scrollLines(SCROLL_STEP) },
+		k: { callback: () => scrollLines(-SCROLL_STEP) },
 		d: { callback: () => scrollHalfPage(1) },
 		u: { callback: () => scrollHalfPage(-1) },
+		"ctrl+d": { callback: () => scrollHalfPage(1) },
+		"ctrl+u": { callback: () => scrollHalfPage(-1) },
 		n: { callback: () => Spicetify.Player.next() },
 		p: { callback: () => Spicetify.Player.back() },
 
@@ -220,15 +223,10 @@
 		);
 	}
 
-	function createScrollCallback(step) {
+	function scrollLines(step) {
 		const app = scrollTarget();
 		if (app) {
-			const scrollInterval = setInterval(() => {
-				app.scrollTop += step;
-			}, 10);
-			document.addEventListener("keyup", () => {
-				clearInterval(scrollInterval);
-			});
+			app.scrollTop += step;
 		}
 	}
 
