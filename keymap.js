@@ -11,7 +11,7 @@
 	}
 
 	const vim = new VimBind();
-	const SCROLL_STEP = 25;
+	const SCROLL_STEP = 100;
 
 	/**
 	 * Binds a keyboard shortcut using Mousetrap.
@@ -29,9 +29,9 @@
 		"shift+pageup": { callback: () => focusOnApp() },
 		"shift+pagedown": { callback: () => focusOnApp() },
 
-		// Scroll actions: d/u (bare and with ctrl) jump half a page per press
-		// with key-repeat throttled to 120ms, j/k step 25px per repeat keydown,
-		// and all of them hit the help modal while it is open
+		// Scroll actions: d/u (bare and with ctrl) jump half a page per press,
+		// j/k step 100px per repeat keydown, and all of them hit the help
+		// modal while it is open
 		j: { callback: () => scrollLines(SCROLL_STEP) },
 		k: { callback: () => scrollLines(-SCROLL_STEP) },
 		d: { callback: () => scrollHalfPage(1) },
