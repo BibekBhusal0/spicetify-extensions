@@ -256,7 +256,10 @@
 		if (side === 0) {
 			// When expanded: the X-collapse button inside the panel header.
 			// When collapsed: the small "Open Your Library" launcher.
-			document.querySelector(".main-yourLibraryX-collapseButton, button[aria-label='Open Your Library']")?.click();
+			// the panel swaps the button per state and carries the action in
+			// its aria-label: "Collapse Your Library" when expanded, "Open
+			// Your Library" when collapsed
+			document.querySelector("button[aria-label='Collapse Your Library'], button[aria-label='Open Your Library']")?.click();
 		} else {
 			document.querySelector('.main-coverSlotCollapsed-container button, button[aria-label="Now playing view"]')?.click();
 		}
