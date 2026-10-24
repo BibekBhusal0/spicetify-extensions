@@ -221,7 +221,7 @@
 	}
 
 	function createScrollCallback(step) {
-		const app = focusOnApp();
+		const app = scrollTarget();
 		if (app) {
 			const scrollInterval = setInterval(() => {
 				app.scrollTop += step;
@@ -232,9 +232,9 @@
 		}
 	}
 
-	// Scroll action target: while the help modal is open, j/k/d/u scroll it
+	// Scroll action target: while the help modal is open, scroll keys act on it
 	function scrollTarget() {
-		return helpOpen ? document.querySelector("#keymap-help .o-help-body") : focusOnApp();
+		return helpOpen.v ? document.querySelector("#keymap-help .o-help-body") : focusOnApp();
 	}
 
 	function scrollHalfPage(direction) {
