@@ -176,7 +176,13 @@
 				}
 				const ae = document.activeElement;
 				if (isInputLike(ae)) {
-					ae.blur();
+					// Spotify's own Escape handling (closing the search
+					// autocomplete) runs on this same event; dismiss
+					// leftovers and blur after it has had its turn
+					setTimeout(() => {
+						document.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+						ae.blur();
+					});
 				}
 			}
 		},
