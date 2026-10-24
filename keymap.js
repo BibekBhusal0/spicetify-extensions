@@ -49,7 +49,7 @@
 		"shift+g": { callback: () => scrollToPosition(1) },
 
 		"shift+h": { callback: () => Spicetify.Platform.History.goBack() },
-		"shift+l": { callback: () => Spicetify.Platform.History.goForward() },
+		"shift+l": { callback: () => Spicetify.Platform.History.push("/library") },
 		"alt+h": { callback: () => Spicetify.Platform.History.goBack() },
 		"alt+l": { callback: () => Spicetify.Platform.History.goForward() },
 

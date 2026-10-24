@@ -33,6 +33,7 @@ spicetify apply
 | `q` | toggle queue panel |
 | `h` | home |
 | `Alt+h` / `Alt+l` | history back / forward |
+| `Shift+l` | open Your Library (full page) |
 | `Ctrl+b` | toggle library sidebar |
 | `Ctrl+Shift+b` | toggle now playing view |
 | `Ctrl+ ←/→` | previous / next track |
