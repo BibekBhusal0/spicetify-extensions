@@ -150,6 +150,12 @@
 		${sections.map(([title, rows]) => `<div class="o-section">${title}</div>${rows.map(([k, d]) => `<div class="o-row"><span class="o-keys">${k}</span><span class="o-desc">${d}</span></div>`).join("")}`).join("")}
 		</div></div></div>`;
 		document.body.append(panel);
+		// click on the dimmed area (not the panel) closes the modal
+		panel.querySelector(".o-overlay").addEventListener("mousedown", (event) => {
+			if (event.target === event.currentTarget) {
+				toggleHelp();
+			}
+		});
 		return panel;
 	}
 
