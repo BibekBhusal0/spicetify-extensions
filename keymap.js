@@ -26,9 +26,6 @@
 				Spicetify.CosmosAsync.post("sp://desktop/v1/shutdown"),
 		},
 
-		"ctrl+tab": { callback: () => rotateSidebar(1) },
-		"ctrl+shift+tab": { callback: () => rotateSidebar(-1) },
-
 		"shift+pageup": { callback: () => focusOnApp() },
 		"shift+pagedown": { callback: () => focusOnApp() },
 
@@ -271,45 +268,6 @@
 		}
 	}
 
-	/**
-	 * @returns {number | undefined}
-	 * @param {NodeListOf<Element>} allItems
-	 */
-	function findActiveIndex(allItems) {
-		const activeLink = document.querySelector(".main-yourLibraryX-navLinkActive");
-		const historyURI = Spicetify.Platform.History.location.pathname.replace(/^\//, "spotify:").replace(/\//g, ":");
-		const activePage = document.querySelector(`[aria-describedby="onClickHint${historyURI}"]`);
-
-		if (!activeLink && !activePage) {
-			return -1;
-		}
-
-		let index = 0;
-		for (const item of allItems) {
-			if (item === activeLink || item === activePage) {
-				return index;
-			}
-
-			index++;
-		}
-	}
-
-	/**
-	 *
-	 * @param {1 | -1} direction
-	 */
-	function rotateSidebar(direction) {
-		const allItems = document.querySelectorAll(
-			"#spicetify-sticky-list .main-yourLibraryX-navLink, .main-yourLibraryX-listItem > div:not(:has([data-skip-in-keyboard-nav])) > div:first-child"
-		);
-		const maxIndex = allItems.length - 1;
-
-		let index = findActiveIndex(allItems) + direction;
-		if (index < 0) index = maxIndex;
-		else if (index > maxIndex) index = 0;
-
-		allItems[index].click();
-	}
 })();
 
 function VimBind() {

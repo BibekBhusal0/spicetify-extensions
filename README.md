@@ -38,7 +38,6 @@ spicetify apply
 | `Ctrl+Shift+b` | toggle now playing view |
 | `Ctrl+ ←/→` | previous / next track |
 | `Ctrl+ ↑/↓` | volume −/+ |
-| `Ctrl+Tab` / `Ctrl+Shift+Tab` | cycle sidebar items |
 | `Shift+f` | vim overlay: letter labels on every clickable element (`Esc` to quit) |
 | `/` | open search page |
 | `Ctrl+q` | quit Spotify |
