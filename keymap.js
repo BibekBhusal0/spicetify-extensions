@@ -55,7 +55,7 @@
 		l: { callback: () => Spicetify.Player.toggleRepeat() },
 		a: { callback: () => Spicetify.Player.toggleHeart() },
 		m: { callback: () => Spicetify.Player.toggleHeart() },
-		q: { callback: () => Spicetify.Platform.History.push("/queue") },
+		q: { callback: () => document.querySelector('button[aria-label="Queue"]')?.click() },
 
 		"ctrl+b": { callback: () => toggleSidebar(0) },
 		"ctrl+shift+b": { callback: () => toggleSidebar(1) },
@@ -104,7 +104,7 @@
 			["s", "Toggle shuffle"],
 			["l", "Toggle repeat"],
 			["f", "Toggle lyrics"],
-			["q", "Open queue"],
+			["q", "Toggle queue panel"],
 			["h", "Go home"],
 			["Shift+h / Shift+l", "History back / forward"],
 			["Alt+h / Alt+l", "History back / forward"],

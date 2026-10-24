@@ -29,7 +29,7 @@ spicetify apply
 | `s` | toggle shuffle |
 | `l` | toggle repeat |
 | `f` | toggle lyrics |
-| `q` | queue page |
+| `q` | toggle queue panel |
 | `h` | home |
 | `Alt+h` / `Alt+l` | history back / forward |
 | `Ctrl+b` | toggle library sidebar |
