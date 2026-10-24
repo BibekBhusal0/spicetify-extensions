@@ -1,5 +1,5 @@
-// NAME: Omarchy Keys
-// AUTHOR: Omarchy overrides (based on Keyboard Shortcut by khanhas, OhItsTom)
+// NAME: Keymap
+// AUTHOR: BibekBhusal0 (based on Keyboard Shortcut by khanhas, OhItsTom)
 // DESCRIPTION: vim-style keybinds for keyboard-driven navigation in the Spotify client.
 
 /// <reference path="../globals.d.ts" />
@@ -10,7 +10,6 @@
 		return;
 	}
 
-	// Variables / Conditions
 	const vim = new VimBind();
 	const SCROLL_STEP = 25;
 
@@ -21,27 +20,24 @@
 	 * @param {(event: KeyboardEvent) => void} callback - Callback function for the event.
 	 */
 	const binds = {
-		// Shutdown Spotify using Ctrl+Q
 		"ctrl+q": {
 			callback: () =>
 				Spicetify.CosmosAsync.post("sp://esperanto/spotify.desktop.lifecycle_esperanto.proto.DesktopLifecycle/Shutdown") &&
 				Spicetify.CosmosAsync.post("sp://desktop/v1/shutdown"),
 		},
 
-		// Rotate through sidebar items using Ctrl+Tab and Ctrl+Shift+Tab
 		"ctrl+tab": { callback: () => rotateSidebar(1) },
 		"ctrl+shift+tab": { callback: () => rotateSidebar(-1) },
 
-		// Focus on the app content before scrolling using Shift+PageUp and Shift+PageDown
 		"shift+pageup": { callback: () => focusOnApp() },
 		"shift+pagedown": { callback: () => focusOnApp() },
 
-		// d/u scroll half a page per press; j/k scroll 25px continuously (hold)
+		// d/u scroll half a page per press; j/k scroll 25px continuously (hold);
+		// both target the help modal instead of the main view while it is open
 		j: { callback: () => createScrollCallback(SCROLL_STEP) },
 		k: { callback: () => createScrollCallback(-SCROLL_STEP) },
 		d: { callback: () => scrollHalfPage(1) },
 		u: { callback: () => scrollHalfPage(-1) },
-		// n/p next/prev track
 		n: { callback: () => Spicetify.Player.next() },
 		p: { callback: () => Spicetify.Player.back() },
 
@@ -49,23 +45,30 @@
 		"g g": { callback: () => scrollToPosition(0) },
 		"shift+g": { callback: () => scrollToPosition(1) },
 
-		// Shift + H and Shift + L to go back and forward page
 		"shift+h": { callback: () => Spicetify.Platform.History.goBack() },
 		"shift+l": { callback: () => Spicetify.Platform.History.goForward() },
+		"alt+h": { callback: () => Spicetify.Platform.History.goBack() },
+		"alt+l": { callback: () => Spicetify.Platform.History.goForward() },
 
-		// M to Like/Unlike track
+		h: { callback: () => Spicetify.Platform.History.push("/") },
+		s: { callback: () => Spicetify.Player.toggleShuffle() },
+		l: { callback: () => Spicetify.Player.toggleRepeat() },
+		a: { callback: () => Spicetify.Player.toggleHeart() },
 		m: { callback: () => Spicetify.Player.toggleHeart() },
+		q: { callback: () => Spicetify.Platform.History.push("/queue") },
 
-		// Forward Slash to open search page
+		"ctrl+b": { callback: () => toggleSidebar(0) },
+		"ctrl+shift+b": { callback: () => toggleSidebar(1) },
+
 		"/": { callback: () => Spicetify.Platform.History.replace("/search") },
 
-		// CTRL + Arrow Left Next and CTRL + Arrow Right  Previous Song
 		"ctrl+left": { callback: () => Spicetify.Player.back() },
 		"ctrl+right": { callback: () => Spicetify.Player.next() },
 
-		// CTRL + Arrow Up Increase Volume CTRL + Arrow Down Decrease Volume
 		"ctrl+up": { callback: () => Spicetify.Player.setVolume(Spicetify.Player.getVolume() + 0.05) },
 		"ctrl+down": { callback: () => Spicetify.Player.setVolume(Spicetify.Player.getVolume() - 0.05) },
+
+		f: { callback: () => document.querySelector('.main-nowPlayingBar-extraControls button[aria-label="Lyrics"]')?.click() },
 
 		// Activate Vim mode (clickable elements get letter-key labels)
 		"shift+f": {
@@ -74,12 +77,8 @@
 				vim.setCancelKey("ESCAPE");
 			},
 		},
-
-		// Fullscreen: delegates to fullAppDisplay's F11 toggle
-		f: { callback: () => Spicetify.Mousetrap.trigger("f11") },
 	};
 
-	// Bind all the keys
 	for (const [key, { staticCondition, callback }] of Object.entries(binds)) {
 		if (typeof staticCondition === "undefined" || staticCondition) {
 			Spicetify.Mousetrap.bind(key, (event) => {
@@ -89,6 +88,109 @@
 				}
 			});
 		}
+	}
+
+	// Own modal on "?" (Spotify's native shortcuts modal is blocked in the
+	// window-capture listener below); j/k/d/u scroll this modal first.
+	const helpOpen = {};
+
+	function buildHelp() {
+		const rows = [
+			["d / u", "Scroll half a page"],
+			["j / k", "Scroll lines"],
+			["g g / Shift+g", "Top / bottom"],
+			["n / p", "Next / previous track"],
+			["a / m", "Like current track"],
+			["s", "Toggle shuffle"],
+			["l", "Toggle repeat"],
+			["f", "Toggle lyrics"],
+			["q", "Open queue"],
+			["h", "Go home"],
+			["Shift+h / Shift+l", "History back / forward"],
+			["Alt+h / Alt+l", "History back / forward"],
+			["Ctrl+b", "Toggle library sidebar"],
+			["Ctrl+Shift+b", "Toggle now playing view"],
+			["Ctrl+ ←/→", "Previous / next track"],
+			["Ctrl+ ↑/↓", "Volume -/+"],
+			["Ctrl+Tab", "Cycle sidebar items"],
+			["Shift+f", "Click-on-element vim mode"],
+			["/", "Search page"],
+			["Ctrl+q", "Quit Spotify"],
+		];
+		const panel = document.createElement("div");
+		panel.id = "keymap-help";
+		panel.innerHTML = `
+		<style>
+		#keymap-help .o-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; z-index: 99999; }
+		#keymap-help .o-panel { background: var(--spice-card); color: var(--spice-text); border-radius: var(--br-1); width: 420px; max-height: 75vh; padding: 20px 24px; display: flex; flex-direction: column; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+		#keymap-help .o-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: var(--spice-text); }
+		#keymap-help .o-help-body { overflow-y: auto; min-height: 0; scrollbar-width: none; }
+		#keymap-help .o-row { display: flex; justify-content: space-between; gap: 24px; padding: 5px 0; font-size: 13.5px; align-items: center; }
+		#keymap-help .o-keys { color: var(--spice-button); white-space: nowrap; font-weight: 600; }
+		#keymap-help .o-desc { color: var(--spice-subtext); text-align: right; }
+		</style>
+		<div class="o-overlay"><div class="o-panel"><div class="o-title">Keybinds</div>
+		<div class="o-help-body">
+		${rows.map(([k, d]) => `<div class="o-row"><span class="o-keys">${k}</span><span class="o-desc">${d}</span></div>`).join("")}
+		</div></div></div>`;
+		document.body.append(panel);
+		return panel;
+	}
+
+	function toggleHelp() {
+		let panel = document.getElementById("keymap-help");
+		if (!panel) {
+			panel = buildHelp();
+			panel.style.display = "none";
+		}
+		helpOpen.v = !helpOpen.v;
+		panel.style.display = helpOpen.v ? "block" : "none";
+		if (helpOpen.v) panel.querySelector(".o-help-body")?.scrollTo(0, 0);
+	}
+
+	function isInputLike(el) {
+		return el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+	}
+
+	// Escape + "?" helpers handled on window capture. Spotify's own "?" handler
+	// still runs (registration order wins), so after opening ours we hide the
+	// native shortcuts modal it opens.
+	window.addEventListener(
+		"keydown",
+		(event) => {
+			if (event.key === "?" && !isInputLike(document.activeElement)) {
+				event.preventDefault();
+				event.stopPropagation();
+				toggleHelp();
+				hideNativeHelp();
+				return;
+			}
+			if (event.key === "Escape") {
+				if (helpOpen.v) {
+					toggleHelp();
+					event.stopImmediatePropagation();
+					return;
+				}
+				const ae = document.activeElement;
+				if (isInputLike(ae)) {
+					ae.blur();
+				}
+			}
+		},
+		true
+	);
+
+	function hideNativeHelp() {
+		const kill = () => {
+			for (const el of document.querySelectorAll('div[role="dialog"]')) {
+				if (el.textContent.includes("Keyboard Shortcuts") && !el.dataset.keymapEaten) {
+					el.style.display = "none";
+					el.dataset.keymapEaten = "1";
+				}
+			}
+		};
+		requestAnimationFrame(kill);
+		setTimeout(kill, 80);
 	}
 
 	// re-render vim on window resize & prevent mouse event while active
@@ -112,7 +214,6 @@
 		true
 	);
 
-	// Functions
 	function focusOnApp() {
 		return document.querySelector(
 			".Root__main-view .os-viewport, .Root__main-view .main-view-container > .main-view-container__scroll-node:not([data-overlayscrollbars-initialize]), .Root__main-view .main-view-container__scroll-node > [data-overlayscrollbars-viewport]"
@@ -131,19 +232,36 @@
 		}
 	}
 
+	// Scroll action target: while the help modal is open, j/k/d/u scroll it
+	function scrollTarget() {
+		return helpOpen ? document.querySelector("#keymap-help .o-help-body") : focusOnApp();
+	}
+
 	function scrollHalfPage(direction) {
 		// throttle keydown auto-repeat: one half-page per 120ms while held
 		if (Date.now() - scrollHalfPage.t < 120) return;
 		scrollHalfPage.t = Date.now();
-		const app = focusOnApp();
+		const app = scrollTarget();
 		if (app) {
 			app.scrollTop += direction * app.clientHeight / 2;
 		}
 	}
 
 	function scrollToPosition(position) {
-		const app = focusOnApp();
+		const app = scrollTarget();
 		app.scroll(0, position === 0 ? 0 : app.scrollHeight);
+	}
+
+	// 0 = library sidebar (left), 1 = now playing view (right). Both are plain
+	// toggle buttons: clicking an already-visible one collapses it.
+	function toggleSidebar(side) {
+		if (side === 0) {
+			// When expanded: the X-collapse button inside the panel header.
+			// When collapsed: the small "Open Your Library" launcher.
+			document.querySelector(".main-yourLibraryX-collapseButton, button[aria-label='Open Your Library']")?.click();
+		} else {
+			document.querySelector('.main-coverSlotCollapsed-container button, button[aria-label="Now playing view"]')?.click();
+		}
 	}
 
 	/**
@@ -272,13 +390,11 @@ function VimBind() {
 				continue;
 			}
 
-			// Exclude certain elements from the centering calculation
 			if (e.parentNode.role !== "row") {
 				top = top + bound.height / 2 - 15;
 				left = left + bound.width / 2 - 15;
 			}
 
-			// Append the key to the correct overlay
 			if (e.tagName === "BUTTON" && e.parentNode.tagName === "LI") {
 				tippyOverlay.append(createKey(e, keyList[firstKey] + keyList[secondKey], top, left));
 			} else {
