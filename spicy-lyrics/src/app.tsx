@@ -77,6 +77,27 @@ async function main() {
 
   guardSpicetifyScrollingFix();
 
+  // Close NPV by default on first launch
+  const setupNPVDefault = () => {
+    try {
+      const rightSidebarKey = Object.keys(localStorage).find(k => k.includes(':ui.right_sidebar_content'));
+      if (!rightSidebarKey) return;
+      
+      const savedState = localStorage.getItem(rightSidebarKey);
+      
+      // If never set or currently open, close it
+      if (!savedState || savedState === '"now_playing_view"') {
+        const npvButton = document.querySelector('[aria-label*="Now Playing"]');
+        const sidebar = document.querySelector('.Root__right-sidebar');
+        if (npvButton && sidebar && sidebar.offsetWidth > 32) {
+          setTimeout(() => npvButton.click(), 100);
+        }
+      }
+    } catch (e) {}
+  };
+
+  setTimeout(setupNPVDefault, 1000);
+
   if (needsMigration()) {
     showMigrationModal();
     return;
