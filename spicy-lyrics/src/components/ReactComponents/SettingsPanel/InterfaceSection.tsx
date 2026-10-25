@@ -1,6 +1,7 @@
 import { useStore } from "@nanostores/react";
 import {
   $lockedMediaBox,
+  $npvSidebarBehavior,
   $removeSpotifyLyricsButton,
   $showNoLyricsNotice,
   $showVolumeSlider,
@@ -12,7 +13,6 @@ import { Select, Toggle } from "./components.tsx";
 import { InterfaceIcon } from "./icons.tsx";
 import type { GroupDef, SectionDef } from "./model.ts";
 
-// Built once: the Control components must keep their identity across renders.
 const groups: GroupDef[] = [
   {
     title: "Lyrics View",
@@ -20,7 +20,6 @@ const groups: GroupDef[] = [
       {
         id: "viewControlsPosition",
         label: "View Controls Position",
-        description: "Where the view controls (play, scroll and so on) sit.",
         keywords: "lyrics controls top bottom",
         useDisabled: () =>
           !useStore($isGlobalNav) && "Only available with Spotify's new navigation layout.",
@@ -37,8 +36,6 @@ const groups: GroupDef[] = [
       {
         id: "timelineOutsideMediaContent",
         label: "Timeline Outside Media Box",
-        description:
-          "Show the playback timeline in the NowBar header instead of inside the media box. Compact Mode keeps it inside.",
         keywords: "progress bar seek",
         Control: ({ label }) => (
           <Toggle
@@ -51,7 +48,6 @@ const groups: GroupDef[] = [
       {
         id: "lockedMediaBox",
         label: "Lock Media Box in Compact Mode",
-        description: "Keep the media box from resizing while Forced Compact Mode is on.",
         keywords: "size artwork",
         Control: ({ label }) => (
           <Toggle
@@ -64,8 +60,6 @@ const groups: GroupDef[] = [
       {
         id: "showNoLyricsNotice",
         label: "No Lyrics Notice",
-        description:
-          "Explain why a song has no lyrics. Errors still show their notice.",
         keywords: "unavailable missing message hide page",
         Control: ({ label }) => (
           <Toggle
@@ -78,8 +72,6 @@ const groups: GroupDef[] = [
       {
         id: "showVolumeSlider",
         label: "Volume Slider",
-        description:
-          "Show a volume control on the artwork in Fullscreen and Cinema View.",
         Control: ({ label }) => (
           <Toggle
             label={label}
@@ -94,10 +86,22 @@ const groups: GroupDef[] = [
     title: "Windows and Buttons",
     settings: [
       {
+        id: "npvSidebarBehavior",
+        label: "Now Playing View Sidebar",
+        keywords: "npv sidebar queue recommendations",
+        Control: ({ label }) => (
+          <Select
+            label={label}
+            value={useStore($npvSidebarBehavior)}
+            options={["remember", "always-close", "always-open"]}
+            labels={["Remember", "Always Close", "Always Open"]}
+            onChange={(v) => $npvSidebarBehavior.set(v)}
+          />
+        ),
+      },
+      {
         id: "removeSpotifyLyricsButton",
         label: "Hide Spotify's Lyrics Button",
-        description:
-          "Remove Spotify's own lyrics button from the playback bar. The Spicy Lyrics button stays.",
         keywords: "remove playbar",
         Control: ({ label }) => (
           <Toggle

@@ -12,7 +12,6 @@ import { Slider, Toggle } from "./components.tsx";
 import { PlaybackIcon } from "./icons.tsx";
 import type { GroupDef, SectionDef } from "./model.ts";
 
-// Built once: the Control components must keep their identity across renders.
 const groups: GroupDef[] = [
   {
     title: "Timing",
@@ -20,7 +19,6 @@ const groups: GroupDef[] = [
       {
         id: "playbackOffset",
         label: "Playback Offset",
-        description: "Shift the lyrics in time. Negative shows them earlier, positive later.",
         keywords: "sync delay latency milliseconds",
         stacked: true,
         Control: ({ label }) => (
@@ -39,8 +37,6 @@ const groups: GroupDef[] = [
       {
         id: "seekFadeCompensation",
         label: "Seek Fade-in Compensation",
-        description:
-          "Clicking a line starts 300 ms before it, so Spotify's fade-in doesn't clip the first word. Best for rap and fast songs.",
         keywords: "click jump",
         Control: ({ label }) => (
           <Toggle
@@ -58,8 +54,6 @@ const groups: GroupDef[] = [
       {
         id: "smoothScrolling",
         label: "Smooth Scrolling",
-        description: "Glide from line to line instead of jumping.",
-        // The refreshed Simple Lyrics look brings its own scroll, whatever this is set to.
         useDisabled: () => {
           const simple = useStore($simpleLyricsMode);
           const refreshed = useStore($experiment("refreshedSimpleLyrics"));
@@ -81,7 +75,6 @@ const groups: GroupDef[] = [
       {
         id: "scrollLeadEnabled",
         label: "Early Scroll",
-        description: "Start scrolling to the next line just before it's sung.",
         keywords: "lead ahead",
         Control: ({ label }) => (
           <Toggle
@@ -94,7 +87,6 @@ const groups: GroupDef[] = [
       {
         id: "scrollLeadMs",
         label: "Early Scroll Time",
-        description: "How far ahead of the line the scroll starts.",
         keywords: "lead ahead",
         stacked: true,
         useDisabled: () => !useStore($scrollLeadEnabled) && "Turn on Early Scroll to change this.",

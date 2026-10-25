@@ -17,7 +17,6 @@ const groups: GroupDef[] = [{
     {
       id: "backgroundStyle",
       label: "Background",
-      description: "Choose a still image or color from the current track.",
       keywords: "artist image cover art colors transparent",
       Control: ({ label }) => (
         <Select
@@ -32,7 +31,6 @@ const groups: GroupDef[] = [{
     {
       id: "backgroundBlur",
       label: "Image blur",
-      description: "Soften cover art or artist images behind the lyrics.",
       keywords: "background image blur",
       stacked: true,
       useDisabled: () => !["artist", "cover"].includes(useStore($backgroundStyle)) && "Only applies to image backgrounds.",

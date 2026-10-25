@@ -8,7 +8,6 @@ import { Slider, Toggle } from "./components.tsx";
 import { AppearanceIcon } from "./icons.tsx";
 import type { GroupDef, SectionDef } from "./model.ts";
 
-// Built once: the Control components must keep their identity across renders.
 const groups: GroupDef[] = [
   {
     title: "Text",
@@ -16,7 +15,6 @@ const groups: GroupDef[] = [
       {
         id: "skipSpicyFont",
         label: "Use System Font",
-        description: "Use your system font instead of the Spicy Lyrics font.",
         keywords: "default font typeface",
         Control: ({ label }) => (
           <Toggle
@@ -34,8 +32,6 @@ const groups: GroupDef[] = [
       {
         id: "animationFpsCapEnabled",
         label: "Limit Frame Rate",
-        description:
-          "Redraw the lyrics, background and scroll less often to save CPU, especially on high refresh rate displays.",
         keywords: "fps cap animation",
         Control: ({ label }) => (
           <Toggle
@@ -48,7 +44,6 @@ const groups: GroupDef[] = [
       {
         id: "animationFpsCap",
         label: "Frame Rate",
-        description: "Frames per second while the limit is on.",
         keywords: "fps cap animation",
         stacked: true,
         useDisabled: () =>
