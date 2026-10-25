@@ -31,7 +31,7 @@ function isStillQueued(result: FetchResult): boolean {
  *
  * The controller lives at module scope, so its timer is completely independent
  * of the lyrics page DOM. Closing the page, swapping between Fullscreen / Cinema
- * / Sidebar / PIP views, or toggling rendering modes never disturbs the backoff
+ * / page views, or toggling rendering modes never disturbs the backoff
  * schedule — when a page is (re)built, the queued loader is simply re-shown for
  * the still-running loop.
  */

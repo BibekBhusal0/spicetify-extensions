@@ -421,10 +421,7 @@ function resetLineSweeps(lines: unknown[]): void {
   _sweepResize?.disconnect();
 }
 
-// Measured once a line is being sung, and again when its size changes, since
-// the type is sized to the window. Height counts too: in Popup Lyrics the type
-// also follows the window's height, which changes the font without changing
-// the line's width.
+// Measure again when the line changes size because its font follows the view dimensions.
 function getLineSweep(lineEl: HTMLElement, words: SyllableLead[]): LineSweep | null {
   const kept = _lineSweeps.get(lineEl);
   if (kept && kept.Spans.length === words.length) return kept;

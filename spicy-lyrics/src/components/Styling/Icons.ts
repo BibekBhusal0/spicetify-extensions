@@ -2,11 +2,10 @@
  * View-control icons share one grid: 24×24, 2-unit round stroke, ink centred on 12,12.
  * Layout icons draw the page as it actually lays out (frame, cover square, lyric lines),
  * so they mirror and move with the page. Parts tagged `SL_Icon*` are driven by state
- * classes in default.css and NPVLyrics.css, which is why those buttons are never rebuilt
+ * classes in default.css, which is why those buttons are never rebuilt
  * just to change state.
  *
- * Left as they are: the brand mark (LyricsPage), PiPMode (it sits in Spotify's playbar
- * and matches Spotify's own glyphs), and the filled transport/heart/volume set, whose
+ * Left as they are: the brand mark (LyricsPage) and the filled transport/heart/volume set, whose
  * IDs, classes and aspect ratios the NowBar CSS depends on.
  */
 
@@ -51,11 +50,6 @@ export const Icons = {
   CinemaView: Line(
     `${Frame}<path class="SL_IconPart SL_NudgeTL" d="M10.5 10.5 7 7m0 3V7h3"/><path class="SL_IconPart SL_NudgeBR" d="M13.5 13.5 17 17m0-3v3h-3"/>`
   ),
-  // Spotify's layout: lyrics leave the right sidebar for the main view.
-  OpenPage: Line(
-    `${Frame}<path d="M15 4v16"/><path class="SL_NudgeL" d="M11.5 12H6.5m2.5-2.5L6.5 12 9 14.5"/>`
-  ),
-
   PrevTrack: TrackSkip.replace("REPLACEME", "PrevTrack"),
   Play: `
 		<svg viewBox="0 0 18 20" xmlns="http://www.w3.org/2000/svg" class="Play">
@@ -94,16 +88,6 @@ export const Icons = {
 			<path id="SpicyLyrics_VolumeMute" d="M15.3 8.8a1 1 0 0 1 1.4 0l1.8 1.8 1.8-1.8a1 1 0 1 1 1.4 1.4L19.9 12l1.8 1.8a1 1 0 0 1-1.4 1.4l-1.8-1.8-1.8 1.8a1 1 0 0 1-1.4-1.4l1.8-1.8-1.8-1.8a1 1 0 0 1 0-1.4z"/>
 		</svg>
 	`,
-  // One chevron for both card states; NPVLyrics.css turns the whole svg over when the card
-  // collapses. The card's morph keeps the main thread busy, so only composited motion shows.
-  CardToggle: Line(`<path d="m6 15 6-6 6 6"/>`),
-  // The card stretching to the sidebar's top and bottom, then the arrows turned inward once
-  // it has. Both are stacked so NPVLyrics.css can cross-fade them on the compositor.
-  CardExpand: `<span class="SL_IconStack">${Line(
-    `<path d="M6 3.5h12"/><path d="M6 20.5h12"/><path d="M12 10.5v-4m-2.5 2.5L12 6.5l2.5 2.5"/><path d="M12 13.5v4m-2.5-2.5 2.5 2.5 2.5-2.5"/>`
-  )}${Line(
-    `<path d="M6 3.5h12"/><path d="M6 20.5h12"/><path d="M12 6.5v4m-2.5-2.5 2.5 2.5 2.5-2.5"/><path d="M12 17.5v-4m-2.5 2.5 2.5-2.5 2.5 2.5"/>`
-  )}</span>`,
   // Cover on the NowBar's current side, pointing at the side it will move to.
   NowBarSideSwap: Line(
     `${Frame}<rect class="SL_IconPart SL_IconCover" x="6" y="9.5" width="5" height="5" rx="1.25"/><path class="SL_IconPart SL_IconSwapArrow" d="M14 12h4m-1.75-1.75L18 12l-1.75 1.75"/>`
@@ -157,7 +141,6 @@ export const Icons = {
   DisableCompactModeIcon: Line(
     `<rect x="3" y="5" width="9" height="9" rx="2"/><path d="M4.5 18.5h6"/><path d="M15.5 7.5h5"/><path d="M15.5 11.5h5"/><path d="M15.5 15.5h3"/>`
   ),
-  PiPMode: `<svg data-encore-id="icon" role="img" aria-hidden="true" class="e-91000-icon e-91000-baseline" viewBox="0 0 16 16" style="--encore-icon-height: var(--encore-graphic-size-decorative-smaller); --encore-icon-width: var(--encore-graphic-size-decorative-smaller);"><path d="M16 2.45c0-.8-.65-1.45-1.45-1.45H1.45C.65 1 0 1.65 0 2.45v11.1C0 14.35.65 15 1.45 15h5.557v-1.5H1.5v-11h13V7H16z"></path><path d="M15.25 9.007a.75.75 0 0 1 .75.75v4.493a.75.75 0 0 1-.75.75H9.325a.75.75 0 0 1-.75-.75V9.757a.75.75 0 0 1 .75-.75z"></path></svg>`,
   // Eight teeth, so the 45° hover turn in default.css lands on an identical gear.
   Settings: Line(
     `<g class="SL_IconPart SL_IconGear"><path d="M10.07 5.69L10.48 3.38A8.75 8.75 0 0 1 13.52 3.38L13.93 5.69A6.6 6.6 0 0 1 15.1 6.17L17.02 4.83A8.75 8.75 0 0 1 19.17 6.98L17.83 8.9A6.6 6.6 0 0 1 18.31 10.07L20.62 10.48A8.75 8.75 0 0 1 20.62 13.52L18.31 13.93A6.6 6.6 0 0 1 17.83 15.1L19.17 17.02A8.75 8.75 0 0 1 17.02 19.17L15.1 17.83A6.6 6.6 0 0 1 13.93 18.31L13.52 20.62A8.75 8.75 0 0 1 10.48 20.62L10.07 18.31A6.6 6.6 0 0 1 8.9 17.83L6.98 19.17A8.75 8.75 0 0 1 4.83 17.02L6.17 15.1A6.6 6.6 0 0 1 5.69 13.93L3.38 13.52A8.75 8.75 0 0 1 3.38 10.48L5.69 10.07A6.6 6.6 0 0 1 6.17 8.9L4.83 6.98A8.75 8.75 0 0 1 6.98 4.83L8.9 6.17A6.6 6.6 0 0 1 10.07 5.69Z"/><circle cx="12" cy="12" r="2.75"/></g>`

@@ -22,10 +22,7 @@
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
-  /* Out of the layout tree once faded out. Hidden but displayed, its
-     container-unit bars were restyled and relaid out on every frame of any
-     Spotify layout animation (the NPV canvas expand/compact lost ~10fps to
-     it). The discrete display transition keeps the fade-out. */
+  /* Remove the hidden bars from layout after the fade completes. */
   display: none;
   transition:
     opacity 0.25s ease-out,
@@ -50,36 +47,13 @@
   }
 }
 
-/* Same type scale the lyrics use in the NPV card and the popup, so the bars
-   sit where the real lines will land. */
-#SpicyLyricsNPVCard #SpicyLyricsPage.CardMode .LyricsContainer .LyricsSkeleton {
-  --SkeletonLineSize: clamp(1.85rem, calc(1cqw * 6), 2.8rem);
-}
-
-/* The card is short: only the bottom fade. */
-#SpicyLyricsNPVCard #SpicyLyricsPage.CardMode .LyricsContainer .LyricsSkeleton .SkeletonLines {
-  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 72%, transparent 97%);
-  mask-image: linear-gradient(180deg, #000 0, #000 72%, transparent 97%);
-}
-
-.spicy-pip-wrapper #SpicyLyricsPage .LyricsContainer .LyricsSkeleton {
-  --SkeletonLineSize: clamp(
-    1.2rem,
-    min(max(1.7rem, 5.5vw), 8vh, 8vw),
-    2.6rem
-  );
-}
-
 #SpicyLyricsPage .LyricsContainer .LyricsSkeleton .SkeletonLines {
   display: flex;
   flex-direction: column;
   gap: calc(var(--SkeletonLineSize) * 0.62);
   box-sizing: border-box;
   height: 100%;
-  /* Matches .SpicyLyricsScrollContainer's default offset and side padding, so
-     the bars sit where the lines will land. Every variant that moves the lines
-     (compact mode, PiP, minimal mode, NowBar on the right, the NPV card) lists
-     .SkeletonLines in the same rule, next to the scroll container. */
+  /* Match the lyric lines' offset and side padding. */
   padding: 25cqh var(--LyricsRightSidePadding, 8cqw) 0 var(--LyricsLeftSidePadding, 10cqw);
   overflow: hidden;
   -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 64px, #000 72%, transparent 97%);

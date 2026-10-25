@@ -23,7 +23,7 @@ import {
   ClearScrollSimplebar,
   ScrollSimplebar,
 } from "../../utils/Scrolling/Simplebar/ScrollSimplebar.ts";
-import ApplyDynamicBackground, { KawarpMap, PAGE_BACKGROUND_KEY } from "../DynamicBG/dynamicBackground.ts";
+import ApplyStaticBackground from "../Styling/StaticBackground.ts";
 import {
   $creditsFollowLastLine,
   $currentLyricsData,
@@ -61,8 +61,6 @@ import {
   OpenNowBar,
 } from "../Utils/NowBar.ts";
 import TransferElement from "../Utils/TransferElement.ts";
-import { IsPIP, _IsPIP_after, ClosePopupLyrics } from "../Utils/PopupLyrics.ts";
-import { NPVCardOwnsPage, DeRenderNPVCard } from "../Utils/NPVLyrics.ts";
 import { CleanUpIsByCommunity } from "../../utils/Lyrics/Applyer/Credits/ApplyIsByCommunity.tsx";
 import { OpenLyricsDBPanel } from "../../utils/openLyricsDBPanel.tsx";
 import { openSettingsPanel } from "../../utils/settings.ts";
@@ -140,24 +138,7 @@ function cancelPendingPageMount() {
 
 let PageResizeListener: ResizeObserver | null = null;
 export let PageContainer: HTMLElement | null = null;
-export let IsCardMode = false;
-
-async function OpenPage(
-  AppendTo: HTMLElement | undefined = undefined,
-  options?: { cardMode?: boolean }
-) {
-
-  if (_IsPIP_after) {
-    await ClosePopupLyrics();
-    // After closing, open again with the same arguments
-    return OpenPage(AppendTo, options);
-  }
-
-  if (!options?.cardMode && NPVCardOwnsPage()) {
-    // The NPV card holds the global page; hand it over to the real requester.
-    await DeRenderNPVCard();
-    return OpenPage(AppendTo, options);
-  }
+async function OpenPage(AppendTo: HTMLElement | undefined = undefined) {
 
   cancelPendingPageMount();
   if (PageView.IsOpened) return;
@@ -167,7 +148,6 @@ async function OpenPage(
   // whatever route the user moved to, with nothing left to destroy it.
   if (
     AppendTo === undefined &&
-    !options?.cardMode &&
     Spicetify.Platform?.History?.location?.pathname !== "/SpicyLyrics"
   ) {
     return;
@@ -176,7 +156,7 @@ async function OpenPage(
   const pageRoot = AppendTo ?? GetPageRoot();
   if (!pageRoot) {
     pageLogger.warn("Cannot open page: main view is unavailable");
-    if (AppendTo === undefined && !options?.cardMode) {
+    if (AppendTo === undefined) {
       PageMountObserver = new MutationObserver(() => {
         if (Spicetify.Platform.History.location.pathname !== "/SpicyLyrics") {
           cancelPendingPageMount();
@@ -191,13 +171,12 @@ async function OpenPage(
     return;
   }
 
-  IsCardMode = !!options?.cardMode;
   /* if (!HoverMode) {
         PageView.IsTippyCapable = false;
     } */
   const elem = document.createElement("div");
   elem.id = "SpicyLyricsPage";
-  // Spotify's OverlayScrollbars (main view, NPV panel) ignores mutations inside
+  // Spotify's OverlayScrollbars ignores mutations inside
   // this marker. Without it, every per-frame word style write made it re-measure
   // its viewport, forcing an extra style + layout pass mid-frame. The page's size
   // never depends on its content, so there is nothing for it to pick up.
@@ -205,9 +184,6 @@ async function OpenPage(
 
   elem.classList.add("SpicyRenderer");
 
-  if (IsCardMode) {
-    elem.classList.add("CardMode");
-  }
 
   /* if (HoverMode) {
         elem.classList.add("TippyMode");
@@ -317,14 +293,7 @@ async function OpenPage(
   const contentBox = elem.querySelector<HTMLElement>(
     ".ContentBox"
   );
-  // Card mode stays transparent — the NPV's own dynamic background shows through.
-  if (contentBox && !IsCardMode) {
-    try {
-      ApplyDynamicBackground(contentBox, PAGE_BACKGROUND_KEY);
-    } catch (err) {
-      pageLogger.error("Error applying dynamic background", err);
-    }
-  }
+  if (contentBox) ApplyStaticBackground(contentBox);
 
   pageRoot.appendChild(elem);
 
@@ -343,7 +312,7 @@ async function OpenPage(
     }
   }
 
-  if (!IsCardMode) {
+  {
     Session_OpenNowBar();
 
     /* const ArtworkButton = document.querySelector<HTMLElement>("#SpicyLyricsPage .ContentBox .NowBar .Header .Artwork");
@@ -356,11 +325,6 @@ async function OpenPage(
 
     AppendViewControls();
 
-    DisableCompactMode();
-  } else if (IsCompactMode()) {
-    // A previous PiP/fullscreen open left the module flag set; the card page
-    // never enables compact mode, and a stale flag makes ScrollToActiveLine
-    // pin the active line to the top instead of centering it.
     DisableCompactMode();
   }
 
@@ -386,12 +350,6 @@ async function OpenPage(
   PageView.IsOpened = true;
   setStockPlaybarPage(elem);
 
-  if (IsPIP) {
-    elem?.classList.add("ForcedCompactMode");
-    OpenNowBar(true);
-    EnableCompactMode();
-  }
-
   PageContainer = elem;
 
   const contentType = SpotifyPlayer.GetContentType();
@@ -401,7 +359,7 @@ async function OpenPage(
     elem?.classList.remove("episode-content-type");
   }
 
-  Global.Event.evoke("page:open", { cardMode: IsCardMode });
+  Global.Event.evoke("page:open", null);
 }
 
 /* Global.Event.listen("playback:songchange", () => {
@@ -442,8 +400,6 @@ async function DestroyPage() {
   // close already playing, so it can't re-insert this page afterwards.
   Fullscreen.CloseImmediately();
 
-  KawarpMap.get(PAGE_BACKGROUND_KEY)?.dispose();
-  KawarpMap.delete(PAGE_BACKGROUND_KEY);
   ResetLastLine();
   CleanupScrollEvents();
   PageResizeListener?.disconnect(); // Disconnect the observer
@@ -467,7 +423,6 @@ async function DestroyPage() {
     Tooltips[key] = null;
   });
   ClearScrollSimplebar();
-  IsCardMode = false;
   Global.Event.evoke("page:destroy", null);
   PageView.IsTippyCapable = true;
   PageContainer = null;
@@ -496,7 +451,6 @@ Global.Event.listen("lyrics:apply", ({ Type }: { Type: string }) => {
 });
 
 function AppendViewControls(ReAppend: boolean = false) {
-  if (IsCardMode) return;
   if (!PageContainer) return;
   controlsLogger.debug("Append view controls");
   const elem = PageContainer.querySelector<HTMLElement>(
@@ -521,11 +475,11 @@ function AppendViewControls(ReAppend: boolean = false) {
         ${
           Fullscreen.IsOpen || Fullscreen.CinemaViewOpen
             ? ""
-            : IsPIP ? "" : `<button id="CinemaView" class="ViewControl">${Icons.CinemaView}</button>`
+          : `<button id="CinemaView" class="ViewControl">${Icons.CinemaView}</button>`
         }
         ${
           Fullscreen.IsOpen || Fullscreen.CinemaViewOpen
-            ? IsPIP ? "" : `<button id="CompactModeToggle" class="ViewControl">${
+            ? `<button id="CompactModeToggle" class="ViewControl">${
                 IsCompactMode()
                   ? Icons.DisableCompactModeIcon
                   : Icons.EnableCompactModeIcon
@@ -542,21 +496,21 @@ function AppendViewControls(ReAppend: boolean = false) {
         ${
           !Fullscreen.IsOpen &&
           !Fullscreen.CinemaViewOpen
-            ? IsPIP ? "" : `<button id="NowBarToggle" class="ViewControl">${Icons.NowBar}</button>`
+            ? `<button id="NowBarToggle" class="ViewControl">${Icons.NowBar}</button>`
             : ""
         }
         ${
           NowBarObj.Open
-            ? IsPIP ? "" : `<button id="NowBarSideToggle" class="ViewControl">${Icons.NowBarSideSwap}</button>`
+            ? `<button id="NowBarSideToggle" class="ViewControl">${Icons.NowBarSideSwap}</button>`
             : ""
         }
         ${
           Fullscreen.IsOpen
-            ? (IsPIP ? "" : `<button id="FullscreenToggle" class="ViewControl">${
+            ? `<button id="FullscreenToggle" class="ViewControl">${
                 Fullscreen.CinemaViewOpen
                   ? Icons.Fullscreen
                   : Icons.CloseFullscreen
-              }</button>`)
+              }</button>`
             : ""
         }
         ${
@@ -564,7 +518,7 @@ function AppendViewControls(ReAppend: boolean = false) {
             ? `<button id="LyricsManager" class="ViewControl">${Icons.LyricsManager}</button>`
             : ""
         }
-        ${IsPIP ? "" : `<button id="SettingsToggle" class="ViewControl">${Icons.Settings}</button>`}
+        <button id="SettingsToggle" class="ViewControl">${Icons.Settings}</button>
         <button id="Close" class="ViewControl">${Icons.Close}</button>
     `;
 
@@ -598,25 +552,14 @@ function AppendViewControls(ReAppend: boolean = false) {
   }
 
   function SetupTippy(elem: HTMLElement) {
-    // If in PIP mode, do not create any Tippy tooltips, but still wire up click handlers
-    const isPip = IsPIP;
-
     const closeButton = elem.querySelector("#Close");
     if (closeButton) {
       try {
-        if (!isPip) {
-          Tooltips.Close = createTooltip(closeButton, {
-            ...Spicetify.TippyProps,
-            content: `Close Page`,
-          });
-        }
+        Tooltips.Close = createTooltip(closeButton, {
+          ...Spicetify.TippyProps,
+          content: `Close Page`,
+        });
         closeButton.addEventListener("click", async () => {
-          if (IsPIP) {
-            await ClosePopupLyrics();
-            globalThis.focus();
-            return;
-          }
-
           // A superseded close (the user navigated, or reopened the page,
           // during the exit animation) must not navigate on top of that.
           // A second click mid-animation joins the running close.
@@ -637,14 +580,12 @@ function AppendViewControls(ReAppend: boolean = false) {
     const compactModeToggle = elem.querySelector("#CompactModeToggle");
     if (compactModeToggle) {
       try {
-        if (!isPip) {
-          Tooltips.CompactModeToggle = createTooltip(compactModeToggle, {
-            ...Spicetify.TippyProps,
-            content: `${
-              IsCompactMode() ? "Disable Compact Mode" : "Enable Compact Mode"
-            }`,
-          });
-        }
+        Tooltips.CompactModeToggle = createTooltip(compactModeToggle, {
+          ...Spicetify.TippyProps,
+          content: `${
+            IsCompactMode() ? "Disable Compact Mode" : "Enable Compact Mode"
+          }`,
+        });
         compactModeToggle.addEventListener("click", () => {
           // Use PageContainer instead of document.querySelector
           const SpicyLyricsPage = PageContainer;
@@ -672,12 +613,10 @@ function AppendViewControls(ReAppend: boolean = false) {
     const romanizationToggle = elem.querySelector("#RomanizationToggle");
     if (romanizationToggle) {
       try {
-        if (!isPip) {
-          Tooltips.RomanizationToggle = createTooltip(romanizationToggle, {
-            ...Spicetify.TippyProps,
-            content: isRomanized ? `Disable Romanization` : `Enable Romanization`,
-          });
-        }
+        Tooltips.RomanizationToggle = createTooltip(romanizationToggle, {
+          ...Spicetify.TippyProps,
+          content: isRomanized ? `Disable Romanization` : `Enable Romanization`,
+        });
         romanizationToggle.addEventListener("click", async () => {
           const songUri = SpotifyPlayer.GetUri();
           if (!songUri) return;
@@ -708,12 +647,10 @@ function AppendViewControls(ReAppend: boolean = false) {
       const nowBarButton = elem.querySelector("#NowBarToggle");
       if (nowBarButton) {
         try {
-          if (!isPip) {
-            Tooltips.NowBarToggle = createTooltip(nowBarButton, {
-              ...Spicetify.TippyProps,
-              content: `NowBar`,
-            });
-          }
+          Tooltips.NowBarToggle = createTooltip(nowBarButton, {
+            ...Spicetify.TippyProps,
+            content: `NowBar`,
+          });
           nowBarButton.addEventListener("click", () => ToggleNowBar());
         } catch (err) {
           controlsLogger.warn("Failed to setup NowBar tooltip", err);
@@ -725,14 +662,12 @@ function AppendViewControls(ReAppend: boolean = false) {
     const fullscreenBtn = elem.querySelector("#FullscreenToggle");
     if (fullscreenBtn) {
       try {
-        if (!isPip) {
-          Tooltips.FullscreenToggle = createTooltip(fullscreenBtn, {
-            ...Spicetify.TippyProps,
-            content: `${
-              Fullscreen.CinemaViewOpen ? "Fullscreen" : "Cinema View"
-            }`,
-          });
-        }
+        Tooltips.FullscreenToggle = createTooltip(fullscreenBtn, {
+          ...Spicetify.TippyProps,
+          content: `${
+            Fullscreen.CinemaViewOpen ? "Fullscreen" : "Cinema View"
+          }`,
+        });
         fullscreenBtn.addEventListener("click", async () => {
           // If we're in cinema view, go to full fullscreen
           if (Fullscreen.CinemaViewOpen) {
@@ -754,12 +689,10 @@ function AppendViewControls(ReAppend: boolean = false) {
     const cinemaViewBtn = elem.querySelector("#CinemaView");
     if (cinemaViewBtn && !Fullscreen.IsOpen) {
       try {
-        if (!isPip) {
-          Tooltips.CinemaView = createTooltip(cinemaViewBtn, {
-            ...Spicetify.TippyProps,
-            content: `Cinema View`,
-          });
-        }
+        Tooltips.CinemaView = createTooltip(cinemaViewBtn, {
+          ...Spicetify.TippyProps,
+          content: `Cinema View`,
+        });
         cinemaViewBtn.addEventListener("click", async () => {
           Fullscreen.Open(true);
         });
@@ -775,12 +708,10 @@ function AppendViewControls(ReAppend: boolean = false) {
       !(isNoLyrics && (Fullscreen.IsOpen || Fullscreen.CinemaViewOpen))
     ) {
       try {
-        if (!isPip) {
-          Tooltips.NowBarSideToggle = createTooltip(nowBarSideToggleBtn, {
-            ...Spicetify.TippyProps,
-            content: `Swap NowBar Side`,
-          });
-        }
+        Tooltips.NowBarSideToggle = createTooltip(nowBarSideToggleBtn, {
+          ...Spicetify.TippyProps,
+          content: `Swap NowBar Side`,
+        });
         nowBarSideToggleBtn.addEventListener("click", () => NowBar_SwapSides());
       } catch (err) {
         controlsLogger.warn("Failed to setup NowBar Side Toggle tooltip", err);
@@ -788,7 +719,7 @@ function AppendViewControls(ReAppend: boolean = false) {
     }
 
     const settingsButton = elem.querySelector("#SettingsToggle");
-    if (settingsButton && !isPip) {
+    if (settingsButton) {
       try {
         Tooltips.Settings = createTooltip(settingsButton, {
           ...Spicetify.TippyProps,
@@ -805,17 +736,11 @@ function AppendViewControls(ReAppend: boolean = false) {
     const lyricsManagerButton = elem.querySelector("#LyricsManager");
     if (lyricsManagerButton && isTTMLMakerMode) {
       try {
-        if (!isPip) {
-          Tooltips.LyricsManager = createTooltip(lyricsManagerButton, {
-            ...Spicetify.TippyProps,
-            content: `Lyrics Manager`,
-          });
-        }
+        Tooltips.LyricsManager = createTooltip(lyricsManagerButton, {
+          ...Spicetify.TippyProps,
+          content: `Lyrics Manager`,
+        });
         lyricsManagerButton.addEventListener("click", () => {
-          if (IsPIP) {
-            globalThis.focus();
-          }
-          
           OpenLyricsDBPanel();
         });
       } catch (err) {

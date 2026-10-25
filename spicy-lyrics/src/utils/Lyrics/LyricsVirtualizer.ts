@@ -51,11 +51,7 @@ const GLIDE_HOLD_MAX_ROWS = 40;
 // Matches the virtualizer's overscan.
 const OVERSCAN = 5;
 
-// scrollTop lands on device pixels, not CSS pixels: one step is 1.44 CSS px at 69%
-// zoom and 0.8 at 125% display scaling. A glide that assumed whole CSS pixels put
-// the list up to half a step from where its sub-pixel translate expected, and the
-// error flipped sign from frame to frame as a visible shimmer. Read per element,
-// since the popup is its own window with its own ratio.
+// Read the ratio per element so scrolling stays aligned to device pixels at any scale.
 function scrollStep(el: HTMLElement): number {
   return 1 / (el.ownerDocument.defaultView?.devicePixelRatio || 1);
 }
@@ -923,8 +919,8 @@ class LyricsVirtualizer {
       this._smoothGeometry = null;
       if (this._spacer) this._spacer.style.height = `${el.clientHeight / 2}px`;
       if (Math.abs(newWidth - this._containerWidth) < 1) {
-        // Width unchanged, but a height-only resize (vertical-only window resize,
-        // PIP) still changes the visible window. The early return would otherwise
+        // Width unchanged, but a height-only window resize still changes the visible window.
+        // The early return would otherwise
         // swallow it until the watchdog catches up; respond immediately here.
         if (Math.abs(el.clientHeight - this._containerHeight) >= 1) {
           virtualizerLogger.debug("Container height changed (width stable)", {

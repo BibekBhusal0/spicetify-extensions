@@ -23,7 +23,7 @@ const CreateLyricsContainer = (): LyricsContainerReturnObject => {
 
   // Coalesce to one pass per frame. Each ResizeObserver callback used to queue
   // its own rAF, so a burst (or anything that resizes the container every frame,
-  // like the NPV card's open/close morph) stacked several SimpleBar
+  // stacked several SimpleBar
   // recalculate() calls — each a forced layout — onto the same frame.
   let resizeRAF: number | null = null;
 

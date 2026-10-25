@@ -20,10 +20,8 @@ function saveSettingsBlob(obj: Record<string, any>) {
 function migrateSettingsKeys(blob: Record<string, any>): Record<string, any> {
   const renames: Record<string, string> = {
     "skip-spicy-font": "skipSpicyFont",
-    show_npv_dynamic_bg: "showNpvDynamicBg",
     // Was an experiment; carry over the choice of anyone who toggled it.
     "experiment:duetLinePadding": "duetLinePadding",
-    staticBackgroundBlur: "backgroundBlur",
   };
   let changed = false;
   for (const [oldKey, newKey] of Object.entries(renames)) {
@@ -33,22 +31,13 @@ function migrateSettingsKeys(blob: Record<string, any>): Record<string, any> {
       changed = true;
     }
   }
-  // The old "Static Background" select. Its "auto" did exactly what "artistHeader" did.
-  if ("staticBackgroundMode" in blob) {
-    const styles: Record<string, BackgroundStyle> = {
-      off: "dynamic",
-      auto: "artist",
-      artistHeader: "artist",
-      coverArt: "cover",
-      color: "color",
-    };
-    blob.backgroundStyle ??= styles[blob.staticBackgroundMode] ?? "dynamic";
-    delete blob.staticBackgroundMode;
-    changed = true;
-  }
   // Simple Lyrics Mode lost its "Animate" style; everyone gets the one that was the default.
   if ("simpleLyricsModeRenderingType" in blob) {
     delete blob.simpleLyricsModeRenderingType;
+    changed = true;
+  }
+  if (blob.backgroundStyle === "dynamic") {
+    blob.backgroundStyle = "cover";
     changed = true;
   }
   if (changed) saveSettingsBlob(blob);
@@ -72,13 +61,7 @@ export function persistAtom<T>(key: string, defaultValue: T) {
 }
 
 // Setting atoms (persisted)
-// "none" paints nothing, so a theme's own background (an image, say) shows through.
-export type BackgroundStyle = "dynamic" | "artist" | "cover" | "color" | "none";
-export const BACKGROUND_STYLES: readonly BackgroundStyle[] = ["dynamic", "artist", "cover", "color", "none"];
-export const $backgroundStyle = persistAtom<BackgroundStyle>("backgroundStyle", "dynamic");
-// Blur radius (px) for the two image styles, "artist" and "cover".
-export const $backgroundBlur = persistAtom<number>("backgroundBlur", 0);
-export const $simpleLyricsMode = persistAtom<boolean>("simpleLyricsMode", false);
+export const $simpleLyricsMode = persistAtom<boolean>("simpleLyricsMode", true);
 export const $minimalLyricsMode = persistAtom<boolean>("minimalLyricsMode", false);
 // Shows a word sung in syllables as one word when its parts line up evenly.
 export const $joinSplitWords = persistAtom<boolean>("joinSplitWords", false);
@@ -90,34 +73,12 @@ export const $duetLinePadding = persistAtom<boolean>("duetLinePadding", true);
 // When a song ends on a duet line sung from the right, the credits under it
 // (writers, provider, community info) move to the right with it.
 export const $creditsFollowLastLine = persistAtom<boolean>("creditsFollowLastLine", false);
-export const $skipSpicyFont = persistAtom<boolean>("skipSpicyFont", false);
-export const $showNpvDynamicBg = persistAtom<boolean>("showNpvDynamicBg", true);
-// Never inject the lyrics card into the Now Playing sidebar at all.
-export const $disableNpvLyrics = persistAtom<boolean>("disableNpvLyrics", false);
-// Pull the whole NPV lyrics card out of the sidebar while the current track has
-// no lyrics, instead of leaving it up showing the "no lyrics" notice.
-export const $hideNpvLyricsWhenUnavailable = persistAtom<boolean>(
-  "hideNpvLyricsWhenUnavailable",
-  true
-);
-// Off: a song that simply has no lyrics (not found, local file, DJ, podcast...) shows
-// only the song info instead of the notice. Errors still show theirs. The NPV card
-// has its own switch above.
+export const $skipSpicyFont = persistAtom<boolean>("skipSpicyFont", true);
+// Off: a song that simply has no lyrics shows only the song info. Errors still show their notice.
 export const $showNoLyricsNotice = persistAtom<boolean>("showNoLyricsNotice", true);
 // Hide Spotify's own lyrics button in the playback bar (ours is left alone).
-export const $removeSpotifyLyricsButton = persistAtom<boolean>("removeSpotifyLyricsButton", false);
+export const $removeSpotifyLyricsButton = persistAtom<boolean>("removeSpotifyLyricsButton", true);
 export const $lockedMediaBox =persistAtom<boolean>("lockedMediaBox", false);
-// $popupLyricsAllowed: stored as actual boolean "popupLyricsAllowed" in the settings blob.
-export const $popupLyricsAllowed = (() => {
-  const initial: boolean =
-    _settings["popupLyricsAllowed"] !== undefined ? _settings["popupLyricsAllowed"] : true;
-  const store = atom<boolean>(initial);
-  store.listen((v) => {
-    _settings["popupLyricsAllowed"] = v;
-    saveSettingsBlob(_settings);
-  });
-  return store;
-})();
 export const $viewControlsPosition = persistAtom<string>("viewControlsPosition", "Top");
 export const $ttmlMakerMode = persistAtom<boolean>("ttmlMakerMode", true);
 // Last upload mode picked in the Local DB upload screen: "persistent" | "temporary".
@@ -127,7 +88,7 @@ export const $timelineOutsideMediaContent = persistAtom<boolean>(
   "timelineOutsideMediaContent",
   true
 );
-// Volume band below the playback controls in Fullscreen / Cinema View / Popup Lyrics.
+// Volume band below the playback controls in Fullscreen and Cinema View.
 export const $showVolumeSlider = persistAtom<boolean>("showVolumeSlider", true);
 // Playback timing offset in milliseconds (bipolar: negative = earlier, positive = later)
 export const $playbackOffset = persistAtom<number>("playbackOffset", 0);
@@ -146,6 +107,10 @@ export const $smoothScrolling = persistAtom<boolean>("smoothScrolling", false);
 // slider value only applies once the cap is turned on.
 export const $animationFpsCapEnabled = persistAtom<boolean>("animationFpsCapEnabled", false);
 export const $animationFpsCap = persistAtom<number>("animationFpsCap", 60);
+export type BackgroundStyle = "artist" | "cover" | "color" | "none";
+export const BACKGROUND_STYLES: BackgroundStyle[] = ["artist", "cover", "color", "none"];
+export const $backgroundStyle = persistAtom<BackgroundStyle>("backgroundStyle", "cover");
+export const $backgroundBlur = persistAtom<number>("backgroundBlur", 24);
 
 // Version atom — NOT persisted, set once at startup
 export const $spicyLyricsVersion = atom<string>(

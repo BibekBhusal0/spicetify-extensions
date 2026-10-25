@@ -48,8 +48,6 @@ export function ApplyLyricsProvider(data: any, LyricsContainer: HTMLElement): vo
       LinkElement.target = "_blank";
       LinkElement.rel = "noopener";
       LinkElement.textContent = via.label;
-      // Opened from the main window: followed from Popup Lyrics, the link opens an
-      // in-client window instead of the browser.
       const url = via.url;
       LinkElement.addEventListener("click", (event) => {
         event.preventDefault();

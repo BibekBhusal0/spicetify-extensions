@@ -174,8 +174,7 @@ let pendingPlaybarSync: ReturnType<typeof setTimeout> | undefined;
 // frames in every view on 1.3.3.
 let stockPlaybarPage: HTMLElement | null = null;
 
-// Pass the mounted page, or null when it goes away. A page in the popup window
-// isn't in this document, so the main window's bar is left alone, as before.
+// Pass the mounted page, or null when it goes away.
 export function setStockPlaybarPage(page: HTMLElement | null) {
   stockPlaybarPage = page?.ownerDocument === document ? page : null;
   syncStockPlaybarClass();

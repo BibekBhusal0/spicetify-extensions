@@ -48,22 +48,6 @@
    #SpicyLyricsPage.CompactMode { position: relative }, and the popup is always
    compact. In flow, the page's height: 100% resolves against this wrapper, and
    without a height here the whole popup collapses to 0px. */
-.spicy-pip-wrapper {
-  height: 100%;
-}
-
-.spicy-pip-wrapper #SpicyLyricsPage .ContentBox {
-  --default-font-size: clamp(0.4rem, calc(1cqw * 3), 1.5rem);
-  /* The popup's layout is driven by both window dimensions, so these use
-     vw/vh: the popup document's viewport is the window, and unlike cq units
-     they resolve the same no matter which container the var is read in.
-     Floor the NowBar height so very short popups still fit the artwork +
-     metadata; it grows with height but is capped by width (tall, narrow
-     popups) and absolutely (tall popups), so the artwork doesn't balloon. */
-  --Compact_NowBarHeight: clamp(54px, min(15vh, 22vw), 96px);
-  /* Gap above the NowBar, and below the hover-expanded artwork. */
-  --PiP_EdgeInset: clamp(12px, 6vh, 32px);
-}
 
 #SpicyLyricsPage {
   --NowBarWidth: calc(min(30cqw, 52cqh) * 1.1);
@@ -604,19 +588,6 @@
   width: 12cqw;
 }
 
-.spicy-pip-wrapper
-  #SpicyLyricsPage.Fullscreen:not(.Exp_PopupDock)
-  .ContentBox
-  .NowBar
-  .CenteredView
-  .Header
-  .MediaBox
-  .MediaContent
-  .PlaybackControls
-  .PlaybackControl {
-  width: 14cqw !important;
-}
-
 #SpicyLyricsPage.Fullscreen
   .ContentBox
   .NowBar
@@ -651,29 +622,6 @@
   width: 7cqw;
 }
 
-.spicy-pip-wrapper
-  #SpicyLyricsPage.Fullscreen:not(.Exp_PopupDock)
-  .ContentBox
-  .NowBar
-  .CenteredView
-  .Header
-  .MediaBox
-  .MediaContent
-  .PlaybackControls
-  .PlaybackControl.ShuffleToggle,
-.spicy-pip-wrapper
-  #SpicyLyricsPage.Fullscreen:not(.Exp_PopupDock)
-  .ContentBox
-  .NowBar
-  .CenteredView
-  .Header
-  .MediaBox
-  .MediaContent
-  .PlaybackControls
-  .PlaybackControl.LoopToggle {
-  width: 10cqw !important;
-}
-
 #SpicyLyricsPage.Fullscreen
   .ContentBox
   .NowBar
@@ -684,19 +632,6 @@
   .PlaybackControls
   .PlaybackControl.PlayStateToggle {
   width: 9.25cqw;
-}
-
-.spicy-pip-wrapper
-  #SpicyLyricsPage.Fullscreen:not(.Exp_PopupDock)
-  .ContentBox
-  .NowBar
-  .CenteredView
-  .Header
-  .MediaBox
-  .MediaContent
-  .PlaybackControls
-  .PlaybackControl.PlayStateToggle {
-  width: 12cqw !important;
 }
 
 #SpicyLyricsPage.Fullscreen
@@ -779,6 +714,27 @@
   .PlaybackControl.Pressed {
   transform: scale(var(--ShrinkScale));
   transition: opacity 0.175s cubic-bezier(0.37, 0, 0.63, 1), transform 0.175s cubic-bezier(0.37, 0, 0.63, 1) !important;
+}
+
+#SpicyLyricsPage .ViewControls .ViewControl {
+  background: var(--spice-sidebar) !important;
+  border: 1px solid var(--spice-main) !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  color: var(--spice-text) !important;
+  transition: background-color 120ms ease, color 120ms ease !important;
+}
+
+#SpicyLyricsPage .ViewControls .ViewControl:hover {
+  background: var(--spice-button) !important;
+  color: var(--spice-main) !important;
+  scale: 1 !important;
+}
+
+#SpicyLyricsPage .ViewControls .ViewControl:active {
+  scale: 1 !important;
 }
 
 #SpicyLyricsPage.Fullscreen
@@ -1131,9 +1087,7 @@
   .MediaContent
   .VolumeControl {
   --VolumeLevel: 0;
-  /* Both are read back by the legacy handle — its diameter scales off the width,
-     its travel off the height — so PiP's wider capsule adapts for free and the
-     box is described in exactly one place. */
+  /* Both skins use the same width and height values. */
   --CapsuleWidth: 4cqw;
   --CapsuleHeight: 32cqh;
   position: absolute;
@@ -1349,19 +1303,8 @@
   opacity: 1;
 }
 
-/* PiP (~390px) and compact mode render the artwork small, which makes the track
-   skinny in absolute pixels — widen it relative to the box, mirroring the
-   .PlaybackControl overrides above. The inset is shared; the thickness is not,
-   since the two skins start from very different widths. */
-.spicy-pip-wrapper
-  #SpicyLyricsPage.Fullscreen.ShowVolumeSlider
-  .ContentBox
-  .NowBar
-  .CenteredView
-  .Header
-  .MediaBox
-  .MediaContent
-  .VolumeControl,
+/* Compact mode renders the artwork small, so widen the control relative to the box. */
+
 #SpicyLyricsPage.Fullscreen.ShowVolumeSlider:is(.CompactMode, .ForcedCompactMode)
   .ContentBox
   .NowBar
@@ -1373,15 +1316,7 @@
   right: 4cqw;
 }
 
-.spicy-pip-wrapper
-  #SpicyLyricsPage.Fullscreen.ShowVolumeSlider.Exp_NewProgressBar
-  .ContentBox
-  .NowBar
-  .CenteredView
-  .Header
-  .MediaBox
-  .MediaContent
-  .VolumeControl,
+
 #SpicyLyricsPage.Fullscreen.ShowVolumeSlider.Exp_NewProgressBar:is(.CompactMode, .ForcedCompactMode)
   .ContentBox
   .NowBar
@@ -1393,15 +1328,7 @@
   --CapsuleWidth: 6.5cqw;
 }
 
-.spicy-pip-wrapper
-  #SpicyLyricsPage.Fullscreen.ShowVolumeSlider:not(.Exp_NewProgressBar)
-  .ContentBox
-  .NowBar
-  .CenteredView
-  .Header
-  .MediaBox
-  .MediaContent
-  .VolumeControl,
+
 #SpicyLyricsPage.Fullscreen.ShowVolumeSlider:not(.Exp_NewProgressBar):is(.CompactMode, .ForcedCompactMode)
   .ContentBox
   .NowBar
@@ -1413,15 +1340,7 @@
   --CapsuleWidth: 2.2cqw;
 }
 
-.spicy-pip-wrapper
-  #SpicyLyricsPage.Fullscreen.ShowVolumeSlider.Exp_NewProgressBar
-  .ContentBox
-  .NowBar
-  .CenteredView
-  .Header
-  .MediaBox
-  .MediaContent
-  .VolumeControl:is(:hover, .Dragging),
+
 #SpicyLyricsPage.Fullscreen.ShowVolumeSlider.Exp_NewProgressBar:is(.CompactMode, .ForcedCompactMode)
   .ContentBox
   .NowBar
@@ -1433,7 +1352,7 @@
   --CapsuleWidth: 8cqw;
 }
 
-.spicy-pip-wrapper #SpicyLyricsPage .VolumeControl .VolumeIcon svg,
+
 #SpicyLyricsPage:is(.CompactMode, .ForcedCompactMode) .VolumeControl .VolumeIcon svg {
   height: 3.4cqh;
 }
@@ -1566,53 +1485,6 @@
   margin-right: var(--LyricsRightSidePadding);
 }
 
-.spicy-pip-wrapper
-  #SpicyLyricsPage
-  .ContentBox
-  .NowBar
-  .CenteredView
-  .Header:has(.MediaBox:hover) {
-  margin-right: 0px !important;
-}
-
-/* In PIP, cap the (square) MediaBox by the width left between the side
-   paddings too — otherwise on tall, narrow popups the height-driven MediaBox
-   overflows horizontally when the NowBar expands on hover. */
-.spicy-pip-wrapper
-  #SpicyLyricsPage.CompactMode
-  .ContentBox
-  .NowBar
-  .CenteredView
-  .Header,
-.spicy-pip-wrapper
-  #SpicyLyricsPage.ForcedCompactMode
-  .ContentBox
-  .NowBar
-  .CenteredView
-  .Header {
-  --MediaBoxSize: min(
-    100cqh,
-    100vw - var(--LyricsLeftSidePadding) - var(--LyricsRightSidePadding)
-  );
-}
-
-.spicy-pip-wrapper
-  #SpicyLyricsPage:is(.CompactMode, .ForcedCompactMode)
-  .ContentBox
-  .NowBar {
-  margin-top: var(--PiP_EdgeInset);
-}
-
-/* Start the lyrics where the NowBar actually ends. A fixed fraction of the
-   height drifts away from it as soon as the NowBar hits its floor or cap, which
-   slid the lyrics under the header on short popups. */
-.spicy-pip-wrapper
-  #SpicyLyricsPage:is(.CompactMode, .ForcedCompactMode)
-  .ContentBox
-  .LyricsContainer {
-  margin-top: calc(var(--PiP_EdgeInset) + var(--Compact_NowBarHeight));
-}
-
 #SpicyLyricsPage.CompactMode .ContentBox .NowBar .Header .MediaBox,
 #SpicyLyricsPage.ForcedCompactMode .ContentBox .NowBar .Header .MediaBox {
   width: var(--MediaBoxSize);
@@ -1662,25 +1534,6 @@
   max-width: 100cqw;
 }
 
-.spicy-pip-wrapper
-  #SpicyLyricsPage.CompactMode
-  .ContentBox
-  .NowBar
-  .Header
-  .Metadata
-  .SongName,
-.spicy-pip-wrapper
-  #SpicyLyricsPage.ForcedCompactMode
-  .ContentBox
-  .NowBar
-  .Header
-  .Metadata
-  .SongName {
-  font-size: clamp(0.9rem, calc(1cqw * 3.5), 1.25rem) !important;
-  line-height: 1.4 !important;
-  max-width: 100cqw;
-}
-
 #SpicyLyricsPage.CompactMode
   .ContentBox
   .NowBar
@@ -1707,25 +1560,6 @@
   .Artists {
   font-size: 1.5rem !important;
   line-height: 2rem !important;
-  max-width: 100cqw;
-}
-
-.spicy-pip-wrapper
-  #SpicyLyricsPage.CompactMode
-  .ContentBox
-  .NowBar
-  .Header
-  .Metadata
-  .Artists,
-.spicy-pip-wrapper
-  #SpicyLyricsPage.ForcedCompactMode
-  .ContentBox
-  .NowBar
-  .Header
-  .Metadata
-  .Artists {
-  font-size: clamp(0.7rem, calc(1cqw * 2.8), 0.95rem) !important;
-  line-height: 1.4 !important;
   max-width: 100cqw;
 }
 
@@ -1834,14 +1668,6 @@
   margin-top: calc(var(--Compact_NowBarHeight) + 50cqw);
 }
 
-.spicy-pip-wrapper
-  #SpicyLyricsPage.SpicyRenderer:not(.Exp_PopupDock):has(.MediaBox:hover)
-  .ContentBox
-  .LyricsContainer {
-  margin-top: calc(var(--PiP_EdgeInset) + var(--Compact_NowBarHeight)) !important;
-  opacity: 0 !important;
-}
-
 #SpicyLyricsPage.CompactMode.CompactifyEnabledCompactMode
   .ContentBox
   .NowBar
@@ -1849,13 +1675,6 @@
   .Header:has(.MediaBox:hover)
   .Metadata,
 #SpicyLyricsPage.ForcedCompactMode.CompactifyEnabledCompactMode
-  .ContentBox
-  .NowBar
-  .CenteredView
-  .Header:has(.MediaBox:hover)
-  .Metadata,
-.spicy-pip-wrapper
-  #SpicyLyricsPage:not(.Exp_PopupDock)
   .ContentBox
   .NowBar
   .CenteredView
@@ -2149,100 +1968,8 @@
   padding: 0.2em 0.5em 1em 0.5em !important;
 }
 
-.spicy-pip-wrapper
-  #SpicyLyricsPage:not(.Exp_PopupDock)
-  .ContentBox
-  .NowBar:has(.CenteredView .Header .MediaBox:hover) {
-  /* The hover-expanded NowBar is exactly the (square) MediaBox: as tall as the
-     popup allows below its top inset, and no taller than the width between the
-     side paddings, so it never runs off the bottom or right edge. */
-  height: min(
-    100vh - 2 * var(--PiP_EdgeInset),
-    100vw - var(--LyricsLeftSidePadding) - var(--LyricsRightSidePadding)
-  ) !important;
-}
-
-.spicy-pip-wrapper #SpicyLyricsPage .ContentBox .LyricsContainer {
-  transition: opacity 0.2s !important;
-}
-
-.spicy-pip-wrapper
-  #SpicyLyricsPage.Fullscreen:not(.Exp_PopupDock)
-  .ContentBox
-  .NowBar
-  .CenteredView
-  .Header
-  .MediaBox
-  .MediaContent
-  .ViewControls {
-  height: 12cqh !important;
-}
-
-.spicy-pip-wrapper
-  #SpicyLyricsPage
-  .LyricsContainer
-  .LyricsContent
-  .simplebar-content-wrapper
-  .SpicyLyricsScrollContainer,
-.spicy-pip-wrapper #SpicyLyricsPage .LyricsContainer .LyricsSkeleton .SkeletonLines {
-  padding-top: 14.5cqh !important;
-}
-
-.spicy-pip-wrapper #SpicyLyricsPage {
-  /* Side paddings scale with popup width but are clamped to avoid being too
-     thin on tiny popups or unnecessarily wide on resized large popups. */
-  --LyricsLeftSidePadding: clamp(0.75rem, 7cqw, 5.5rem) !important;
-  --LyricsRightSidePadding: clamp(0.75rem, 7.5cqw, 5.5rem) !important;
-}
-
-.spicy-pip-wrapper #SpicyLyricsPage:not(.SpicyRenderer) {
-  --LyricsLeftSidePadding: clamp(0.5rem, 4cqw, 3.5rem);
-  --LyricsRightSidePadding: clamp(0.5rem, 4.5cqw, 3.5rem);
-}
-
-.spicy-pip-wrapper
-  #SpicyLyricsPage.CompactMode
-  .ContentBox
-  .NowBar
-  .Header
-  .MediaBox
-  .MediaImageContainer {
-  transition: border-radius 0.3s !important;
-}
-
-.spicy-pip-wrapper
-  #SpicyLyricsPage.CompactMode
-  .ContentBox
-  .NowBar
-  .Header
-  .MediaBox:not(:hover)
-  .MediaImageContainer {
-  border-radius: 9cqh !important;
-  --BorderRadius: 9cqh !important;
-}
-
 /* No Lyrics Notice off, without the popup dock: nothing to show under the header, so the popup
    holds the enlarged cover the header otherwise opens to on hover. */
-.spicy-pip-wrapper #SpicyLyricsPage:not(.Exp_PopupDock) .ContentBox.LyricsHidden .NowBar {
-  height: min(
-    100vh - 2 * var(--PiP_EdgeInset),
-    100vw - var(--LyricsLeftSidePadding) - var(--LyricsRightSidePadding)
-  ) !important;
-}
-
-.spicy-pip-wrapper #SpicyLyricsPage:not(.Exp_PopupDock) .ContentBox.LyricsHidden .NowBar .CenteredView .Header {
-  margin-right: 0 !important;
-}
-
-.spicy-pip-wrapper #SpicyLyricsPage:not(.Exp_PopupDock) .ContentBox.LyricsHidden .NowBar .CenteredView .Header .Metadata {
-  opacity: 0;
-}
-
-.spicy-pip-wrapper #SpicyLyricsPage:not(.Exp_PopupDock) .ContentBox.LyricsHidden .NowBar .Header .MediaBox .MediaImageContainer {
-  opacity: 1;
-  border-radius: 3cqh !important;
-  --BorderRadius: 3cqh !important;
-}
 
 
 #SpicyLyricsPage .MediaImageContainer {

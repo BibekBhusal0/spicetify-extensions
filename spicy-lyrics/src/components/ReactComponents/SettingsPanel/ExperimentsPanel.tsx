@@ -8,8 +8,6 @@ import {
   type ResolvedExperiment,
   setExperiment,
 } from "../../../utils/experiments.ts";
-import { $backgroundStyle } from "../../../utils/stores.ts";
-import { BACKGROUND_STYLE_LABELS } from "./BackgroundSection.tsx";
 import { Row, Toggle } from "./components.tsx";
 
 /**
@@ -99,15 +97,7 @@ export function SyncStatus() {
 
 // Settings outside the experiment that keep it from taking effect. Each is a hook,
 // called on every render of its own row; it returns the note to show, or false.
-const CONFLICTS: Partial<Record<ExperimentId, () => string | false>> = {
-  canvasImmersive: () => {
-    const style = useStore($backgroundStyle);
-    return (
-      style !== "dynamic" &&
-      `Not showing: Background is set to ${BACKGROUND_STYLE_LABELS[style] ?? style}. Switch it to Dynamic (Kawarp) to use this.`
-    );
-  },
-};
+const CONFLICTS: Partial<Record<ExperimentId, () => string | false>> = {};
 
 const noConflict = () => false as const;
 

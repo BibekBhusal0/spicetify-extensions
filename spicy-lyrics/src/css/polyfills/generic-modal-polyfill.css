@@ -50,6 +50,20 @@ sl-generic-modal.SpicyLyricsModal .sl-modal::before {
     z-index: 0;
 }
 
+sl-generic-modal.SpicyLyricsModal .slmodal-settingsPanel::before {
+    background: var(--spice-main);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+}
+
+sl-generic-modal.SpicyLyricsModal .sl-modal::before {
+    background: var(--spice-main);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
 sl-generic-modal.SpicyLyricsModal .sl-modal-container-large,
 sl-generic-modal.SpicyLyricsModal .sl-modal-container {
     display: flex;
@@ -128,5 +142,4 @@ sl-generic-modal.SpicyLyricsModal .sl-modal-close-btn:hover {
 
 sl-generic-modal.SpicyLyricsModal .sl-modal-close-btn:active {
     background-color: var(--accent-tint-bg-hover);
-    transform: scale(0.96);
 }

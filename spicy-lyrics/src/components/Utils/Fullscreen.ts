@@ -4,12 +4,10 @@ import { ResetLastLine } from "../../utils/Scrolling/ScrollToActiveLine.ts";
 import { $currentLyricsData } from "../../utils/stores.ts";
 import { $forceCompactMode, $isNowBarOpen } from "../../utils/uiState.ts";
 import Global from "../Global/Global.ts";
-import { SetKawarpSuspended } from "../DynamicBG/dynamicBackground.ts";
 import PageView, { Compactify, GetPageRoot, PageContainer, Tooltips } from "../Pages/PageView.ts";
 import { EnableCompactMode, IsCompactMode } from "./CompactMode.ts";
 import { CleanUpNowBarComponents, CloseNowBar, DeregisterNowBarBtn, OpenNowBar } from "./NowBar.ts";
 import TransferElement from "./TransferElement.ts";
-import { IsPIP } from "./PopupLyrics.ts";
 import { Spring } from "../../modules/Spring.ts";
 import { Maid } from "../../modules/Maid.ts";
 import Scheduler from "../../modules/Scheduler.ts";
@@ -28,35 +26,8 @@ const ControlsMaid = new Maid();
 
 const controlsOpacitySpring = new Spring(0, 2, 2, 0); // Goal: 0.65
 const artworkBrightnessSpring = new Spring(0, 2, 2, 0); // Goal: 0.78
-// Canvas Stage's dock rows: up with the controls, down only once they've fully faded.
-const dockLiftSpring = new Spring(0, 2.5, 1, 0);
 
 let animationLastTimestamp: number | undefined;
-
-// The layouts whose dock rows read --DockLift (Canvas Stage, the popup dock). Nothing else does.
-const isDockLayout = () =>
-  (PageContainer?.classList.contains("CanvasImmersive") ||
-    (IsPIP && PageContainer?.classList.contains("Exp_PopupDock"))) ??
-  false;
-
-// --DockLift sits on the Header, so every write restyles the whole Header; identical values are skipped.
-let dockLiftWritten: { el: HTMLElement; value: string } | null = null;
-
-function writeDockLift(header: HTMLElement, dockLift: number) {
-  const value = dockLift.toString();
-  if (dockLiftWritten?.el === header && dockLiftWritten.value === value) return;
-  header.style.setProperty("--DockLift", value);
-  dockLiftWritten = { el: header, value };
-}
-
-// Canvas Stage's stage element, kept between frames instead of looked up on each one.
-let canvasStage: HTMLElement | null = null;
-
-function getCanvasStage(): HTMLElement | null {
-  if (canvasStage?.isConnected && PageContainer?.contains(canvasStage)) return canvasStage;
-  canvasStage = PageContainer?.querySelector<HTMLElement>(".ContentBox > .CanvasStage") ?? null;
-  return canvasStage;
-}
 
 let visualsApplied = false;
 let pageHover = false;
@@ -91,16 +62,6 @@ const RunMediaBoxAnimation = () => {
     const deltaTime = (timestampNow - animationLastTimestamp) / 1000;
     const controlsOpacity = controlsOpacitySpring.Step(deltaTime);
     const artworkBrightness = artworkBrightnessSpring.Step(deltaTime);
-    if (controlsOpacitySpring.GetGoal() > 0) {
-      dockLiftSpring.SetGoal(1);
-    } else if (controlsOpacity <= 0.005) {
-      dockLiftSpring.SetGoal(0);
-    }
-    // Outside the dock layouts nothing reads the lift, so it isn't animated there: it sits at
-    // its goal, ready for a dock layout that turns on, and doesn't keep this loop running.
-    if (!isDockLayout()) dockLiftSpring.SetGoal(dockLiftSpring.GetGoal(), true);
-    const dockLift = dockLiftSpring.Step(deltaTime);
-
     const MediaBox = PageContainer?.querySelector<HTMLElement>(
       ".ContentBox .NowBar .Header .MediaBox"
     );
@@ -108,11 +69,9 @@ const RunMediaBoxAnimation = () => {
     if (MediaBox) {
       MediaBox.style.setProperty("--ArtworkBrightness", artworkBrightness.toString());
       MediaBox.style.setProperty("--ControlsOpacity", controlsOpacity.toString());
-      if (MediaBox.parentElement) writeDockLift(MediaBox.parentElement, dockLift);
     }
-    getCanvasStage()?.style.setProperty("--StageBrightness", artworkBrightness.toString());
 
-    if (controlsOpacitySpring.CanSleep() && artworkBrightnessSpring.CanSleep() && dockLiftSpring.CanSleep()) {
+    if (controlsOpacitySpring.CanSleep() && artworkBrightnessSpring.CanSleep()) {
       animationLastTimestamp = undefined;
       visualsApplied = false;
       return;
@@ -166,12 +125,9 @@ const ToggleControls = (force: boolean = false) => {
     }
   };
 
-  // Canvas Stage and the popup dock move the dock rows on this spring, so it runs critically
-  // damped at a quicker response there; the cover layout keeps its slow overdamped fade.
-  const immersive = isDockLayout();
   for (const spring of [controlsOpacitySpring, artworkBrightnessSpring]) {
-    spring.SetFrequency(immersive ? 2.5 : 2);
-    spring.SetDampingRatio(immersive ? 1 : 2);
+    spring.SetFrequency(2);
+    spring.SetDampingRatio(2);
   }
 
   controlsOpacitySpring.SetGoal(getControlsOpacityGoal());
@@ -232,7 +188,6 @@ const HIDDEN_MAIN_STYLES = {
   inset: "0",
 } as const;
 
-// The Now Playing sidebar is inside #main, so its background has nothing to draw while it's hidden.
 function hideMainElement(mainElement: HTMLElement) {
   for (const [property, value] of Object.entries(HIDDEN_MAIN_STYLES)) {
     mainElement.style.setProperty(property, value);
@@ -431,8 +386,7 @@ function Open(skipDocumentFullscreen: boolean = false, moveElement: boolean = tr
         SpicyPage.addEventListener("mouseleave", Page_MouseOut, { signal });
       }
 
-      if (!IsPIP) {
-        syncNativeChromeInsets(SpicyPage);
+      syncNativeChromeInsets(SpicyPage);
         // Resize fires on every pointer move of a window drag; one measure per frame is enough.
         let syncFrame: number | null = null;
         const sync = () => {
@@ -460,13 +414,12 @@ function Open(skipDocumentFullscreen: boolean = false, moveElement: boolean = tr
           zoomObserver.observe(root, { attributes: true, attributeFilter: ["style"] });
           signal.addEventListener("abort", () => zoomObserver.disconnect());
         }
-      }
     }
 
     Global.Event.evoke("fullscreen:open", null);
   }
   setTimeout(() => {
-    if (IsPIP || !stillOpen()) return;
+    if (!stillOpen()) return;
 
     Compactify();
 
@@ -487,7 +440,7 @@ function Open(skipDocumentFullscreen: boolean = false, moveElement: boolean = tr
 }
 
 /**
- * The shared tail of a non-PiP close: put the page back into the normal flow
+ * Put the page back into the normal flow
  * (or leave it where it is, when it's about to be destroyed) and reset the
  * fullscreen-only NowBar/MediaBox state.
  */
@@ -530,7 +483,7 @@ function finishClose(SpicyPage: HTMLElement, transfer: boolean) {
  * (page destroyed, fullscreen reopened) — callers that navigate after closing
  * must then leave navigation to whoever superseded it.
  */
-function Close(isPip: boolean = false): Promise<boolean> {
+function Close(): Promise<boolean> {
   // A second Close during the exit animation (double click, Esc + click) joins
   // the one already running instead of replaying the animation and transfer.
   if (closeInFlight) return closeInFlight;
@@ -541,23 +494,6 @@ function Close(isPip: boolean = false): Promise<boolean> {
   const generation = ++fullscreenGeneration;
   Fullscreen.IsOpen = false;
   Fullscreen.CinemaViewOpen = false;
-
-  if (isPip) {
-    SpicyPage.classList.remove("Fullscreen");
-
-    ResetLastLine();
-
-    if (!$isNowBarOpen.get()) {
-      CloseNowBar();
-    }
-
-    CleanupMediaBox();
-    CleanUpNowBarComponents();
-
-    Global.Event.evoke("fullscreen:exit", null);
-    GetCurrentLyricsContainerInstance()?.Resize();
-    return Promise.resolve(true);
-  }
 
   showMainElement();
 
@@ -606,14 +542,6 @@ function CloseImmediately() {
   Fullscreen.IsOpen = false;
   Fullscreen.CinemaViewOpen = false;
   document.body.style.removeProperty("pointer-events");
-
-  if (IsPIP) {
-    SpicyPage.classList.remove("Fullscreen");
-    CleanupMediaBox();
-    CleanUpNowBarComponents();
-    Global.Event.evoke("fullscreen:exit", null);
-    return;
-  }
 
   showMainElement();
   finishClose(SpicyPage, false);

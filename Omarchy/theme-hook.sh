@@ -1,8 +1,4 @@
 #!/bin/bash
-# Omarchy theme-set hook: refresh the spicetify Omarchy palette inside the
-# Spotify client and reload its UI in place over the CEF debug port, so
-# theme changes never restart the process.
-
 set -euo pipefail
 
 THEME_DIR="$HOME/.config/spicetify/Themes/Omarchy"
@@ -19,7 +15,6 @@ color() {
   printf '%s' "$(omarchy-theme-color "$1" "$2")" | sed 's/^#//'
 }
 
-# blends two hex colors; t is how much of the second is kept
 mix() {
   awk -v a="${1#\#}" -v b="${2#\#}" -v t="$3" '
     function hv(c, i) { return index("0123456789abcdef", tolower(substr(c, i, 1))) - 1 }
@@ -47,7 +42,6 @@ accent=$(color accent "$text")
 red=$(color red ff5345)
 subtext=$(mix "$text" "$muted" 0.4)
 disabled=$(mix "$muted" "$bg" 0.4)
-# light mode needs darker buttons for contrast, dark mode brighter ones
 [[ $(color mode dark) == dark ]] && btn_mix="#ffffff" || btn_mix="#000000"
 button=$(mix "$accent" "$btn_mix" 0.3)
 
@@ -81,8 +75,6 @@ if [[ -f $STATE_FILE ]] && cmp -s "$THEME_DIR/color.ini" "$STATE_FILE" \
   exit 0
 fi
 
-# colors.css/user.css mirror what spicetify's apply/watch produce, minus the
-# preprocessing they also do; palette swaps alone are safe to do here.
 {
   printf ':root {\n'
   awk -F' *= *' '
@@ -108,7 +100,6 @@ cp "$XPUI/colors.css" "$STATE_FILE.xpui"
 
 pgrep -f /opt/spotify/spotify >/dev/null || exit 0
 
-# reload the running UI over the CEF debug port (no process restart)
 SPOTIFY_DEBUG_PORT="$DEBUG_PORT" python3 <<'PY' || true
 import json, os, base64, socket, struct, urllib.parse, urllib.request
 

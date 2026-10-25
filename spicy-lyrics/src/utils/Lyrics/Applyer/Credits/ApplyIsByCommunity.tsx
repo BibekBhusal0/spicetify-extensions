@@ -1,5 +1,4 @@
 import { createTooltip } from "../../../tooltip.ts";
-import { IsPIP } from "../../../../components/Utils/PopupLyrics.ts";
 
 let isByCommunityAbortController: AbortController | null = null;
 let madeTippys = new Set<any>();
@@ -97,14 +96,12 @@ export function ApplyIsByCommunity(data: any, LyricsContainer: HTMLElement): voi
     wrapperSpan.appendChild(profileButton);
     songInfoElement.appendChild(wrapperSpan);
 
-    if (!IsPIP) {
-      madeTippys.add(
-        createTooltip(profileButton, {
-          ...Spicetify.TippyProps,
-          content: `View TTML Profile`,
-        })
-      );
-    }
+    madeTippys.add(
+      createTooltip(profileButton, {
+        ...Spicetify.TippyProps,
+        content: `View TTML Profile`,
+      })
+    );
     // Spotify's Space shortcut would otherwise cancel the press and toggle playback.
     profileButton.addEventListener(
       "keydown",
@@ -117,9 +114,6 @@ export function ApplyIsByCommunity(data: any, LyricsContainer: HTMLElement): voi
       "click",
       () => {
         openProfile(person.id);
-        if (IsPIP) {
-          globalThis.focus();
-        }
       },
       { signal }
     );

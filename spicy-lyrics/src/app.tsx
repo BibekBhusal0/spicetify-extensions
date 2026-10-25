@@ -6,23 +6,15 @@ import "./css/default.scss";
 import "./css/Simplebar.css";
 import "./css/ContentBox.css";
 import "./css/Lyrics/main.css";
-import "./css/DynamicBG/spicy-dynamic-bg.css";
 import "./css/Lyrics/Mixed.css";
 import "./css/Loaders/LoaderContainer.css";
 import "./css/Loaders/LyricsSkeleton.css";
 import "./css/font-pack/font-pack.css";
 
-import ApplyDynamicBackground, {
-  getBackgroundStyle,
-  PAGE_BACKGROUND_KEY,
-  PrefetchArtistImage,
-} from "./components/DynamicBG/dynamicBackground.ts";
-import { isExperimentEnabled } from "./utils/experiments.ts";
-import "./components/DynamicBG/CanvasImmersive.ts";
+import ApplyStaticBackground from "./components/Styling/StaticBackground.ts";
 import {
   $currentLyricsData,
   $removeSpotifyLyricsButton,
-  $popupLyricsAllowed,
   $spicyLyricsVersion,
   $developerMode,
 } from "./utils/stores.ts";
@@ -51,11 +43,7 @@ import "./components/ReactComponents/LyricsManager/styles.css";
 import "./css/polyfills/generic-modal-polyfill.css";
 import "./css/NoticeDialog.css";
 import "./css/polyfills/sonner-polyfill.css";
-import "./css/NPVLyrics.css";
-import "./css/PopupDock.css";
 import { showUpdatedDialog } from "./components/ReactComponents/UpdateDialog.tsx";
-import { IsPIP, OpenPopupLyrics, ClosePopupLyrics } from "./components/Utils/PopupLyrics.ts";
-import { GetNPVCardElement, initNPVLyrics } from "./components/Utils/NPVLyrics.ts";
 import ReactDOM from "react-dom/client";
 import { runThemeMatcher } from "./utils/themeMatcher.ts";
 import { guardSpicetifyScrollingFix } from "./utils/scrollFixGuard.ts";
@@ -73,7 +61,6 @@ import { getRemoteConfig, StartRemoteConfigSync } from "./utils/remoteConfig.ts"
 
 async function main() {
   const appLogger = new Logger("App");
-  const dynamicBgLogger = new Logger("Dynamic Background");
   const playbackLogger = new Logger("Playback");
 
   // First thing: it needs nothing from Spotify, and the sooner it lands the
@@ -326,31 +313,6 @@ async function main() {
           false
         ),
       },
-      {
-        Registered: false,
-        // Created whenever the browser supports it; whether it is shown follows
-        // $popupLyricsAllowed (see syncPopupLyricsButton).
-        Button: (
-          ('documentPictureInPicture' in window)
-            ? new SpotifyPlayer.Playbar.Button(
-              "Spicy Popup Lyrics",
-              Icons.PiPMode,
-              () => {
-                if (IsPIP) {
-                  ClosePopupLyrics();
-                } else {
-                  OpenPopupLyrics();
-                }
-              },
-              false,
-              false,
-              // Registering is left to syncPopupLyricsButton, which tracks it in
-              // `Registered`; registering here showed it even with the setting off.
-              false
-            )
-            : undefined
-        )
-      }
     ];
   }
 
@@ -373,35 +335,14 @@ async function main() {
     Global.Saves.shift_key_pressed = false;
   });
 
-  // Registers or removes the Popup Lyrics button to match the setting, so turning
-  // it on or off applies right away instead of after a restart. The body class
-  // hides Spotify's Miniplayer button while ours is in use (default.css).
-  let pageContainerAvailable = false;
-  const syncPopupLyricsButton = () => {
-    const allowed = ('documentPictureInPicture' in window) && $popupLyricsAllowed.get();
-    document.body.classList.toggle("SpicyLyrics_PopupLyricsEnabled", allowed);
-    const popupLyricsEntry = ButtonList?.[2];
-    if (!popupLyricsEntry?.Button || !pageContainerAvailable) return;
-    if (allowed && !popupLyricsEntry.Registered) {
-      popupLyricsEntry.Button.register();
-      popupLyricsEntry.Registered = true;
-    } else if (!allowed && popupLyricsEntry.Registered) {
-      popupLyricsEntry.Button.deregister();
-      popupLyricsEntry.Registered = false;
-    }
-  };
-
   Global.Event.listen("pagecontainer:available", () => {
     if (!ButtonList) return;
-    pageContainerAvailable = true;
     for (const button of ButtonList) {
-      if (button === ButtonList[2]) continue;
       if (!button.Registered) {
         if (button.Button) button.Button.register();
         button.Registered = true;
       }
     }
-    syncPopupLyricsButton();
   });
 
   // Only the playbar buttons depend on Playbar.Button. A bare `return` here used
@@ -416,43 +357,6 @@ async function main() {
     fullscreenButton.element.id = "SpicyLyrics_FullscreenButton";
     fullscreenButton.element.style.setProperty("display", "inline-block", "important");
 
-    const popupLyricsButton = ButtonList[2].Button;
-    if (popupLyricsButton) {
-      popupLyricsButton.element.style.order = "100000";
-      popupLyricsButton.element.id = "SpicyLyrics_PopupLyricsButton";
-      popupLyricsButton.element.style.setProperty("display", "inline-block", "important");
-    }
-    syncPopupLyricsButton();
-    $popupLyricsAllowed.listen(syncPopupLyricsButton);
-
-    // Spotify's Miniplayer button is hidden by a rule (see syncPopupLyricsButton),
-    // not here: this only runs when our playbar observer fires, which missed some
-    // of Spotify's re-renders and left both buttons showing.
-    const hideUnwantedButtons = (container: Element) => {
-      for (const element of container.children) {
-        const testId = element.attributes.getNamedItem("data-testid")?.value;
-
-        const isFullscreen = testId === "fullscreen-mode-button";
-        const isGenericControl =
-          testId !== "lyrics-button" &&
-          element.classList.contains("control-button") &&
-          !element.classList.contains("volume-bar__icon-button") &&
-          !element.classList.contains("main-devicePicker-controlButton");
-
-        if (
-          (isFullscreen || isGenericControl) &&
-          element.id !== "SpicyLyrics_PageButton" &&
-          element.id !== "SpicyLyrics_FullscreenButton" &&
-          element.id !== "SpicyLyrics_PopupLyricsButton"
-        ) {
-          (element as HTMLElement).style.display = "none";
-        }
-      }
-    };
-
-    Global.Event.listen("playbar:controls", hideUnwantedButtons);
-    const controlsContainer = SpotifyPlayer.Playbar.GetControls();
-    if (controlsContainer) hideUnwantedButtons(controlsContainer);
   }
 
   let button: any;
@@ -535,17 +439,9 @@ async function main() {
         fetchLyrics(songUri).then(ApplyLyrics);
       }
 
-      void PrefetchArtistImage();
-
       const contentBox = PageContainer?.querySelector<HTMLElement>(".ContentBox");
       if (!contentBox) return;
-      // The original Cover Colors look repaints a second after the change (dynamicBackground.ts).
-      if (getBackgroundStyle() === "color" && !isExperimentEnabled("refinedBackground")) return;
-      try {
-        void ApplyDynamicBackground(contentBox, PAGE_BACKGROUND_KEY);
-      } catch (err) {
-        dynamicBgLogger.error("Failed applying dynamic background to page", err);
-      }
+      ApplyStaticBackground(contentBox);
     }
     Global.Event.listen("playback:songchange", onSongChange);
 
@@ -564,7 +460,8 @@ async function main() {
       );
     }
 
-    await PrefetchArtistImage();
+    const contentBox = PageContainer?.querySelector<HTMLElement>(".ContentBox");
+    if (contentBox) ApplyStaticBackground(contentBox);
 
     window.addEventListener("online", () => {
       $lastFetchedUri.set(null);
@@ -866,22 +763,20 @@ async function main() {
     () => syncLyricsButtonRegistration()
   );
 
-  initNPVLyrics();
-
   Hometinue();
 
   runThemeMatcher();
 
   setTimeout(() => {
     Spicetify.Keyboard.registerImportantShortcut(Spicetify.Keyboard.KEYS.ESCAPE, async () => {
-      if (IsPIP) return;
-      if (Fullscreen.CinemaViewOpen && (await Fullscreen.Close())) {
+      if (Spicetify.Platform.History.location.pathname !== "/SpicyLyrics") return;
+      if (Fullscreen.IsOpen && !(await Fullscreen.Close())) return;
+      if (Spicetify.Platform.History.location.pathname === "/SpicyLyrics") {
         Session.GoBackFrom("/SpicyLyrics");
       }
     });
 
     Spicetify.Keyboard.registerImportantShortcut(Spicetify.Keyboard.KEYS.F11, async () => {
-      if (IsPIP) return;
       if (Fullscreen.IsOpen) {
         if (!Fullscreen.CinemaViewOpen) {
           Fullscreen.CinemaViewOpen = true;
@@ -898,9 +793,7 @@ async function main() {
 
   document.addEventListener("fullscreenchange", async () => {
     if (!document.fullscreenElement && Fullscreen.IsOpen && !Fullscreen.CinemaViewOpen) {
-      Fullscreen.CinemaViewOpen = true;
-      await ExitFullscreenElement();
-      PageView.AppendViewControls(true);
+      if (await Fullscreen.Close()) Session.GoBackFrom("/SpicyLyrics");
     }
   });
 

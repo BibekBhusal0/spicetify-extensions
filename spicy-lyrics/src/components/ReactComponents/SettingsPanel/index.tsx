@@ -1,14 +1,14 @@
 import { useStore } from "@nanostores/react";
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { $experimentOverrides } from "../../../utils/experiments.ts";
 import { PopupModal } from "../../Modal.ts";
 import About, { useUpdateStatus } from "./About.tsx";
 import { advancedSection } from "./AdvancedSection.tsx";
 import { appearanceSection } from "./AppearanceSection.tsx";
 import { backgroundSection } from "./BackgroundSection.tsx";
-import { Highlight, PeekContext, Row, SearchBar } from "./components.tsx";
+import { Highlight, Row, SearchBar } from "./components.tsx";
 import { experimentsSection } from "./ExperimentsSection.tsx";
-import { AboutIcon, ChevronIcon, CloseIcon, PeekIcon } from "./icons.tsx";
+import { AboutIcon, ChevronIcon, CloseIcon } from "./icons.tsx";
 import { interfaceSection } from "./InterfaceSection.tsx";
 import { lyricsSection } from "./LyricsSection.tsx";
 import {
@@ -30,9 +30,9 @@ const aboutSection: SectionDef = {
 
 const SECTIONS: SectionDef[] = [
   lyricsSection,
-  backgroundSection,
   playbackSection,
   interfaceSection,
+  backgroundSection,
   appearanceSection,
   experimentsSection,
   advancedSection,
@@ -45,10 +45,6 @@ const sectionById = (id: SectionId) => SECTIONS.find((s) => s.id === id) ?? SECT
 let lastTab: SectionId = SECTIONS[0].id;
 
 const notDisabled = () => false as const;
-
-// Peeking only helps when lyrics are actually behind the panel: the lyrics page or
-// the NPV card in this window. Popup Lyrics lives in its own window.
-const lyricsBehindPanel = () => !!document.querySelector("#SpicyLyricsPage");
 
 function SettingRow({ def, query }: { def: SettingDef; query: string }) {
   const useDisabled = def.useDisabled ?? notDisabled;
@@ -108,20 +104,6 @@ export default function SettingsPanel() {
   const [instant, setInstant] = useState(true);
   const updateStatus = useUpdateStatus();
 
-  // What the panel keeps while peeking: a row (a slider being dragged), or nothing.
-  const [peek, setPeek] = useState<{ keep: HTMLElement | null } | null>(null);
-  const canPeek = lyricsBehindPanel();
-  const peekControls = useMemo(
-    () => ({
-      start: (keep: HTMLElement | null) => {
-        if (lyricsBehindPanel()) setPeek({ keep });
-      },
-      end: () => setPeek(null),
-    }),
-    []
-  );
-  const rootRef = useRef<HTMLDivElement>(null);
-
   const searchRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -148,19 +130,6 @@ export default function SettingsPanel() {
     setQuery(value);
     setInstant(true);
   };
-
-  // The overlay and the modal's glass sit outside the panel, so the state goes on
-  // the overlay for settings-panel.css to clear them away.
-  useLayoutEffect(() => {
-    const overlay = rootRef.current?.closest(".sl-modal-overlay");
-    if (!overlay || !peek) return;
-    overlay.setAttribute("data-peek", peek.keep ? "row" : "all");
-    peek.keep?.setAttribute("data-peek-keep", "");
-    return () => {
-      overlay.removeAttribute("data-peek");
-      peek.keep?.removeAttribute("data-peek-keep");
-    };
-  }, [peek]);
 
   // A new page starts at its top.
   useLayoutEffect(() => {
@@ -264,8 +233,7 @@ export default function SettingsPanel() {
   const Accessory = section.Accessory;
 
   return (
-    <PeekContext.Provider value={peekControls}>
-    <div className="sl-sp" ref={rootRef}>
+    <div className="sl-sp">
       <nav className="sl-sp-sidebar" aria-label="Settings sections">
         <div className="sl-sp-brand">
           <span className="sl-sp-brand-line">Spicy Lyrics</span>
@@ -295,35 +263,6 @@ export default function SettingsPanel() {
             </span>
           ) : (
             Accessory && <Accessory />
-          )}
-          {canPeek && (
-            <button
-              type="button"
-              className="sl-sp-peek"
-              aria-label="Peek at the lyrics"
-              title="Hold to see the lyrics behind the settings"
-              aria-pressed={peek !== null && peek.keep === null}
-              onPointerDown={(event) => {
-                if (event.button !== 0) return;
-                event.currentTarget.setPointerCapture(event.pointerId);
-                peekControls.start(null);
-              }}
-              onPointerUp={peekControls.end}
-              onPointerCancel={peekControls.end}
-              onLostPointerCapture={peekControls.end}
-              onKeyDown={(event) => {
-                if ((event.key === " " || event.key === "Enter") && !event.repeat) {
-                  event.preventDefault();
-                  peekControls.start(null);
-                }
-              }}
-              onKeyUp={(event) => {
-                if (event.key === " " || event.key === "Enter") peekControls.end();
-              }}
-              onBlur={peekControls.end}
-            >
-              {PeekIcon}
-            </button>
           )}
           <button
             type="button"
@@ -401,6 +340,5 @@ export default function SettingsPanel() {
         </div>
       </section>
     </div>
-    </PeekContext.Provider>
   );
 }

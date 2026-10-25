@@ -15,7 +15,6 @@ import Fullscreen, {
   IsFullscreenClosing,
   SetControlsDragLock,
 } from "./Fullscreen.ts";
-import { IsPIP } from "./PopupLyrics.ts";
 import { IsCompactMode } from "./CompactMode.ts";
 import { Maid } from "../../modules/Maid.ts";
 import Scheduler from "../../modules/Scheduler.ts";
@@ -168,9 +167,9 @@ function ApplyMarquee(baseWidth, elementWidth, name) {
 let NowBarFullscreenMaid: Maid | null = null;
 
 function PositionTimelineElement(TimelineElem: HTMLElement) {
-  const forceInsideMediaContent = IsCompactMode() || IsPIP || !$timelineOutsideMediaContent.get();
+  const forceInsideMediaContent = IsCompactMode() || !$timelineOutsideMediaContent.get();
   if (forceInsideMediaContent) {
-    // In CompactMode, PIP, or when setting is off: place inside .MediaContent
+    // In CompactMode or when setting is off: place inside .MediaContent
     const MediaContent = PageContainer?.querySelector<HTMLElement>(
       ".ContentBox .NowBar .Header .MediaBox .MediaContent"
     );
@@ -564,15 +563,10 @@ function OpenNowBar(skipSaving: boolean = false) {
 
         // Add drag functionality
 
-        // The document the bar lives in when the drag starts. In Popup Lyrics the
-        // page is moved into the Picture-in-Picture window's own document, so
-        // listening on the main one missed the release and kept the drag alive
-        // until the pointer next crossed the main window.
-        let dragDoc: Document = document;
+        const dragDoc = document;
 
         const handleDragStart = (event: MouseEvent | TouchEvent) => {
           isDragging = true;
-          dragDoc = SliderBar.ownerDocument ?? document;
           // .Dragging keeps the bar thickened and turns off the fill's eased glide
           // so it tracks the pointer 1:1.
           SliderBar.classList.add("Dragging");
@@ -728,7 +722,7 @@ function OpenNowBar(skipSaving: boolean = false) {
 
         return {
           Apply: () => {
-            if (IsCompactMode() || IsPIP || !$timelineOutsideMediaContent.get()) {
+            if (IsCompactMode() || !$timelineOutsideMediaContent.get()) {
               // Timeline goes inside MediaContent — must use AppendQueue
               // because Whentil.When wipes MediaContent with innerHTML = ""
               AppendQueue.push(TimelineElem);
@@ -875,12 +869,7 @@ function OpenNowBar(skipSaving: boolean = false) {
           }
         };
 
-        // The document the capsule lives in when the drag starts. In Popup Lyrics
-        // the page is moved into the Picture-in-Picture window's own document;
-        // listening on the main one missed the release, so the drag stayed alive
-        // and the next hover over the main window set the volume from a pointer
-        // position in a different window (usually 0%).
-        let dragDoc: Document = document;
+        const dragDoc = document;
         // A press on the glyph is a mute tap until the pointer travels far enough
         // to count as a drag; then it adjusts the volume like the rest of the track.
         let pendingIconTap = false;
@@ -905,7 +894,6 @@ function OpenNowBar(skipSaving: boolean = false) {
           const press = pointFromEvent(event);
           pressX = press.clientX;
           pressY = press.clientY;
-          dragDoc = VolumeElement.ownerDocument ?? document;
           isDragging = true;
           // .Dragging keeps the capsule expanded and turns off the fill's eased
           // glide so it tracks the pointer 1:1.
@@ -1401,18 +1389,10 @@ async function getAVCStreamUrl(manifestUrl: string) {
     }
 } */
 
-/**
- * The fullscreen song/artist links. In PiP the page lives in the popup window
- * and `Fullscreen.IsOpen` is true too, but the main-window Close would drag the
- * page out of the popup — so there we only navigate the main window, and bring
- * it forward so the navigation is visible. A click during the exit animation is
- * dropped rather than navigating twice.
- */
 async function navigateFromFullscreen(pathname: string) {
   if (IsFullscreenClosing()) return;
-  if (!IsPIP && Fullscreen.IsOpen && !(await Fullscreen.Close())) return;
+  if (Fullscreen.IsOpen && !(await Fullscreen.Close())) return;
   Session.Navigate({ pathname });
-  if (IsPIP) globalThis.focus();
 }
 
 // Each UpdateNowBar takes a token for its delayed metadata swap; a later update
@@ -1638,18 +1618,7 @@ function UpdateNowBar(force = false) {
 }
 
 
-// A layout can animate the swap: it gets the swap to run at the right moment and returns true,
-// or returns false to let it happen straight away. Set by CanvasImmersive.ts.
-type SideSwapTransition = (applySwap: () => void, to: "left" | "right") => boolean;
-let sideSwapTransition: SideSwapTransition | null = null;
-
-function SetSideSwapTransition(transition: SideSwapTransition | null) {
-  sideSwapTransition = transition;
-}
-
 function NowBar_SwapSides() {
-  const to = $nowBarSide.get() === "right" ? "left" : "right";
-  if (sideSwapTransition?.(ApplySideSwap, to)) return;
   ApplySideSwap();
 }
 
@@ -1854,7 +1823,6 @@ export {
   UpdateNowBar,
   Session_OpenNowBar,
   NowBar_SwapSides,
-  SetSideSwapTransition,
   Session_NowBar_SetSide,
   SyncNowBarSide,
   DeregisterNowBarBtn,

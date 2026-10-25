@@ -4,7 +4,6 @@ import { SyncNoLyricsLayout } from "../../utils/Lyrics/LyricsNotice.ts";
 import { $lockedMediaBox } from "../../utils/stores.ts";
 import Global from "../Global/Global.ts";
 import { Session_NowBar_SetSide } from "./NowBar.ts";
-import { IsPIP } from "./PopupLyrics.ts";
 
 let CompactMode = false;
 
@@ -19,12 +18,10 @@ export const EnableCompactMode = () => {
   NowBar.classList.add("LeftSide");
   NowBar.classList.remove("RightSide");
 
-  if (!IsPIP) {
-    if ($lockedMediaBox.get()) {
-      NowBar.classList.add("LockedMediaBox");
-    } else {
-      NowBar.classList.remove("LockedMediaBox");
-    }
+  if ($lockedMediaBox.get()) {
+    NowBar.classList.add("LockedMediaBox");
+  } else {
+    NowBar.classList.remove("LockedMediaBox");
   }
 
   CompactMode = true;
@@ -59,7 +56,6 @@ $lockedMediaBox.listen((v) => {
   if (!CompactMode) return;
   const SpicyLyricsPage = PageContainer;
   if (!SpicyLyricsPage) return;
-  if (IsPIP) return;
   const NowBar = SpicyLyricsPage.querySelector<HTMLElement>(".ContentBox .NowBar");
   if (!NowBar) return;
   if (v) {

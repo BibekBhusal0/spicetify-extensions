@@ -89,36 +89,6 @@ export const EXPERIMENTS = [
     pageClass: "Exp_LyricsSkeleton",
   },
   {
-    id: "canvasImmersive",
-    label: "Canvas Stage",
-    description:
-      "When a song has a Spotify Canvas, it fills the Now Bar side of the screen in place of the album cover, and its colors drive the page background. Only applies with the dynamic background. Disable to keep the cover and the animated cover background.",
-    default: true,
-  },
-  {
-    id: "npvCanvasBackground",
-    label: "Canvas NPV Background",
-    description:
-      "When a song has a Spotify Canvas, the Now Playing View's dynamic background is drawn from the Canvas video playing there, frame for frame, instead of the album cover. Disable to keep the cover.",
-    default: true,
-  },
-  {
-    id: "popupDock",
-    label: "Popup Player Dock",
-    description:
-      "Popup lyrics fill the whole window, with the player docked along the bottom like the Canvas Stage: title and artist at rest, the timeline and controls rising in when you move the mouse. Disable to bring back the cover header and the controls over the enlarged cover.",
-    default: true,
-    pageClass: "Exp_PopupDock",
-  },
-  {
-    id: "refinedBackground",
-    label: "Refined Background",
-    description:
-      "Background changes crossfade in place, including switching styles in Settings, and Cover Colors use the cover's deeper tones, changing with the song instead of a second later. Image backgrounds keep their edges instead of being cropped. Disable to bring back the sliding image transition and the brighter Cover Colors.",
-    default: true,
-    pageClass: "Exp_RefinedBackground",
-  },
-  {
     id: "refreshedSimpleLyrics",
     label: "Refreshed Simple Lyrics Mode",
     description:

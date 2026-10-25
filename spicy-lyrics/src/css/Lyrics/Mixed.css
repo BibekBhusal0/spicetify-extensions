@@ -17,15 +17,7 @@
   --BlurAmount: 0px !important;
 }
 
-/* --DefaultLyricsSize is an unregistered var holding cqw, so every element that
-   reads it (each word and letter, through the animator's per-frame
-   translate3d(0, calc(var(--DefaultLyricsSize) * n), 0)) resolves container
-   units on its own. Blink recomputes all such elements whenever Spotify's
-   .Root (an inline-size container) is laid out, i.e. every frame of any NPV
-   layout animation: the canvas expand/compact dropped to ~15fps with the card
-   open. Resolving it once per line as a registered <length> and handing the
-   descendants plain px keeps the value identical (nothing between a line and
-   its words is a container) and leaves only the lines container-dependent. */
+/* Resolve the container unit once per line so every word inherits the same size. */
 @property --SL-LineLyricsSize {
   syntax: '<length>';
   inherits: true;
@@ -689,23 +681,6 @@
   --DefaultLyricsSize: clamp(0.8rem, calc(1cqw * 5), 2.5rem);
 }
 
-/* Popup (PiP) static lyrics: kept intentionally a touch smaller than synced
-   lines, but bumped well above the default static floor so they stay
-   readable in the small popup window. Specificity (1,5,0) beats the base
-   static rule above (1,4,0). */
-.spicy-pip-wrapper
-  #SpicyLyricsPage.SpicyRenderer
-  .LyricsContainer
-  .SpicyLyricsScrollContainer[data-lyrics-type="Static"] {
-  /* Bounded by height and narrow widths the same way as the synced popup
-     size (Lyrics/main.css). */
-  --DefaultLyricsSize: clamp(
-    1rem,
-    min(max(1.4rem, 6vw), 7vh, 7vw),
-    2.3rem
-  );
-}
-
 #SpicyLyricsPage.SpicyRenderer
   .LyricsContainer
   .SpicyLyricsScrollContainer[data-lyrics-type="Static"]
@@ -1011,7 +986,7 @@
   /* Follows the .LyricsContent width (`cqw`, it's a size container), capped at
      a ratio of the lyrics size. `em` is the parent's font-size, which the
      scroll container inherits as var(--DefaultLyricsSize) from .LyricsContent.
-     A plain `em` ratio doesn't work in narrow views (sidebar card, popup): the
+     A plain `em` ratio doesn't work in narrow views: the
      lyrics sit at their clamp floor there, which left the credits oversized.
      The rem inside max() keeps that cap from undercutting the cqw value when
      the lyrics are small. .SongInfo and .LyricsProvider follow the same scheme. */

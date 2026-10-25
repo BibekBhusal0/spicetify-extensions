@@ -42,7 +42,7 @@ export function HideLyricsSkeleton(): void {
  */
 export function PaintLyricsSkeleton(): Promise<void> {
   ShowLyricsSkeleton();
-  // rAF never fires in a hidden document (minimized window, PiP owning the page).
+  // rAF never fires in a hidden document.
   if (document.hidden) return Promise.resolve();
   return new Promise((resolve) => {
     const fallback = setTimeout(resolve, 100);

@@ -28,6 +28,21 @@
   will-change: transform;
 }
 
+#SpicyLyricsPage .spicy-dynamic-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-position: center;
+  background-size: cover;
+  transform: scale(1.08);
+  filter: brightness(0.55) contrast(1.05) saturate(1.2) blur(var(--BackgroundImageBlur, 24px));
+}
+
+#SpicyLyricsPage.NoBackground .spicy-dynamic-bg {
+  display: none;
+}
+
 #SpicyLyricsPage.frame_F_Exit {
   transform: translateY(100%);
 }
@@ -237,11 +252,6 @@ body.player-floating:has(.glassify-bg) #SpicyLyricsPage:not(.Fullscreen) .ViewCo
   cursor: pointer;
 }
 
-/* Spotify 1.3.x: Spicetify no longer maps the sidebar or NPV section classes, so
-   these rules also reach the NPV through aside.NowPlayingView, the panel's test id
-   and child position, which hold on both builds. The panel's first child is the
-   cover widget; every later child except our card is a section. */
-/* Mirrors Spotify's .main-nowPlayingBar-lyricsButton rule, which our buttons no longer carry. */
 .SpicyLyrics_PlaybarButton {
   flex-shrink: 0;
   padding: 0;
@@ -273,22 +283,6 @@ body.player-floating:has(.glassify-bg) #SpicyLyricsPage:not(.Fullscreen) .ViewCo
 
 .Root:not(.global-nav) #SpicyLyricsPageSvg {
   transform: translateY(0);
-}
-
-#SpicyLyrics_PopupLyricsButton svg {
-  fill: var(--encore-icon-fill, currentColor);
-  height: var(--encore-icon-height, var(--encore-graphic-size-decorative-base));
-  width: var(--encore-icon-width, var(--encore-graphic-size-decorative-base));
-  transform: translateY(2px);
-}
-
-/* Our Popup Lyrics button takes the place of Spotify's Miniplayer button. A rule
-   rather than a one-off inline style, so a Miniplayer button Spotify re-renders
-   or adds back later is hidden as well. */
-body.SpicyLyrics_PopupLyricsEnabled
-  :is([data-testid="now-playing-bar"], .Root__now-playing-bar)
-  button[data-testid="pip-toggle-button"] {
-  display: none !important;
 }
 
 button:has(#SpicyLyricsPageSvg)::after {
@@ -721,13 +715,6 @@ sl-generic-modal.SpicyLyricsModal .sl-modal-overlay-animated.Active .sl-modal-co
   }
 }
 
-aside.NowPlayingView,
-.Root__right-sidebar aside {
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-
-
 .main-genericButton-button.main-genericButton-buttonActiveDot:after {
   content: "";
   background-color: var(--spice-button);
@@ -742,24 +729,8 @@ aside.NowPlayingView,
   inline-size: 4px !important;
 }
 
-/* "Remove Spotify's lyrics button" setting. Our own button carries #SpicyLyricsPageSvg. */
 body.SpicyLyrics_RemoveSpotifyLyricsButton .main-nowPlayingBar-lyricsButton[data-testid="lyrics-button"]:not(:has(#SpicyLyricsPageSvg)),
 body.SpicyLyrics_RemoveSpotifyLyricsButton [data-testid="now-playing-bar"] [data-testid="lyrics-button"]:not(:has(#SpicyLyricsPageSvg)),
 body.SpicyLyrics_RemoveSpotifyLyricsButton .main-nowPlayingBar-extraControls > [data-testid="lyrics-button"]:not(:has(#SpicyLyricsPageSvg)) {
   display: none !important;
-}
-
-
-/* --- OVERRIDE: Force plain sidebar / Now Playing View background & remove all glow/blur --- */
-aside.NowPlayingView,
-.Root__right-sidebar,
-[data-npv-root],
-.main-nowPlayingView-content,
-.main-nowPlayingView-container,
-.main-nowPlayingView-panel {
-  background-color: var(--spice-main) !important;
-  background-image: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: none !important;
 }

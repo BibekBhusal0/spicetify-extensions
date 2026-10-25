@@ -1,6 +1,6 @@
 import Session from "../../components/Global/Session.ts";
 import { SpotifyPlayer } from "../../components/Global/SpotifyPlayer.ts";
-import { IsCardMode, PageContainer } from "../../components/Pages/PageView.ts";
+import { PageContainer } from "../../components/Pages/PageView.ts";
 import { IsCompactMode } from "../../components/Utils/CompactMode.ts";
 import Fullscreen from "../../components/Utils/Fullscreen.ts";
 import { SyncNowBarSide } from "../../components/Utils/NowBar.ts";
@@ -111,11 +111,9 @@ export function SetShownNotice(descriptor: string | null): void {
 
 function shouldHideLyricsArea(): boolean {
   if (!shownNotice || !PageContainer) return false;
-  // The NPV card has its own switch (Hide When a Song Has No Lyrics), which removes it.
-  if (IsCardMode) return false;
   if (!$showNoLyricsNotice.get() && NO_LYRICS_NOTICES.has(shownNotice)) return true;
-  // Fullscreen, Cinema View and the popup show the song on its own instead of the
-  // notice. Compact mode keeps the notice: the song info is already beside it.
+  // Fullscreen and Cinema View show the song on its own instead of the notice.
+  // Compact mode keeps the notice because the song info is already beside it.
   return (
     (shownNotice === "lyrics-not-found" || shownNotice === "local-track") &&
     !IsCompactMode() &&
@@ -141,9 +139,7 @@ $showNoLyricsNotice.listen(() => queueMicrotask(SyncNoLyricsLayout));
 
 function describeView(): string {
   const parts: string[] = [];
-  const pip = !!PageContainer?.closest(".spicy-pip-wrapper");
-  if (pip) parts.push("Popup");
-  else if (Fullscreen.CinemaViewOpen) parts.push("Cinema");
+  if (Fullscreen.CinemaViewOpen) parts.push("Cinema");
   else if (Fullscreen.IsOpen) parts.push("Fullscreen");
   else parts.push("Page");
   if (IsCompactMode()) parts.push("compact");
@@ -199,8 +195,7 @@ export function BuildNoticeReport(descriptor: string, status: number, uri: strin
   return ["**Spicy Lyrics notice**", "```", ...lines, "```"].join("\n");
 }
 
-// Web API first: the native bridge can resolve without writing anything, and then
-// nothing after it runs. `from` picks the clicked window, since in PiP that's the popup.
+// Try the page clipboard first, then Spicetify's native bridge, then a textarea fallback.
 async function copyText(text: string, from: Element): Promise<boolean> {
   const doc = from.ownerDocument;
   try {

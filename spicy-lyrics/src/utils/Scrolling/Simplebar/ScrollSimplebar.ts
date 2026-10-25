@@ -26,10 +26,7 @@ export function MountScrollSimplebar() {
     return;
   }
 
-  // The popup's lyrics can be a few hundred px tall over a very long list, where
-  // the default 25px thumb is a hard target.
-  const scrollbarMinSize = LyricsContainer.closest(".spicy-pip-wrapper") ? 36 : 25;
-  ScrollSimplebar = new SimpleBar(LyricsContainer, { autoHide: false, scrollbarMinSize });
+  ScrollSimplebar = new SimpleBar(LyricsContainer, { autoHide: false, scrollbarMinSize: 25 });
 
   PageContainer
     .querySelector<HTMLElement>(ElementEventQuery)

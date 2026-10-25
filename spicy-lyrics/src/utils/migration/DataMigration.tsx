@@ -58,13 +58,7 @@ function hasAnyOldKey(): boolean {
   for (const key of OLD_UI_STATE_KEYS) {
     if (Spicetify.LocalStorage.get(`${OLD_PREFIX}${key}`) !== null) return true;
   }
-  if (
-    Spicetify.LocalStorage.get(`${OLD_PREFIX}disablePopupLyrics`) !== null ||
-    Spicetify.LocalStorage.get(`${OLD_PREFIX}hide_npv_bg`) !== null ||
-    Spicetify.LocalStorage.get(`${OLD_PREFIX}devMode`) !== null ||
-    Spicetify.LocalStorage.get(`${OLD_PREFIX}staticBackground`) !== null ||
-    Spicetify.LocalStorage.get(`${OLD_PREFIX}staticBackgroundType`) !== null
-  ) return true;
+  if (Spicetify.LocalStorage.get(`${OLD_PREFIX}devMode`) !== null) return true;
   return false;
 }
 
@@ -78,35 +72,6 @@ function migrateData() {
     const val = readOld(oldKey);
     if (val !== undefined) settings[newKey] = val;
   }
-  // Merge old staticBackground (bool) + staticBackgroundType (string) into staticBackgroundMode
-  const oldStaticBg = readOld("staticBackground");
-  const oldStaticBgType = readOld("staticBackgroundType");
-  if (oldStaticBg !== undefined || oldStaticBgType !== undefined) {
-    if (!oldStaticBg) {
-      settings["staticBackgroundMode"] = "off";
-    } else {
-      const typeMap: Record<string, string> = {
-        "Auto": "auto",
-        "Artist Header Visual": "artistHeader",
-        "Cover Art": "coverArt",
-        "Color": "color",
-      };
-      settings["staticBackgroundMode"] = typeMap[oldStaticBgType] ?? "auto";
-    }
-  }
-
-  // showNpvDynamicBg is the inverse of the old hide_npv_bg key
-  const oldHideNpvBg = readOld("hide_npv_bg");
-  if (oldHideNpvBg !== undefined) {
-    settings["showNpvDynamicBg"] = !oldHideNpvBg;
-  }
-
-  // popupLyricsAllowed is the inverse of the old disablePopupLyrics key
-  const disablePopup = readOld("disablePopupLyrics");
-  if (disablePopup !== undefined) {
-    settings["popupLyricsAllowed"] = !disablePopup;
-  }
-
   // ttmlMakerMode is on by default and no longer user-toggleable, so the old
   // "devMode" key is intentionally not migrated into it.
 

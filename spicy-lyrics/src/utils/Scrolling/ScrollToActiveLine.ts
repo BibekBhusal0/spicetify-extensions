@@ -9,7 +9,6 @@ import Global from "../../components/Global/Global.ts";
 import { SpotifyPlayer } from "../../components/Global/SpotifyPlayer.ts";
 import { PageContainer } from "../../components/Pages/PageView.ts";
 import { IsCompactMode } from "../../components/Utils/CompactMode.ts";
-import { IsPIP } from "../../components/Utils/PopupLyrics.ts";
 import {
   type LyricsLine,
   LyricsObject,
@@ -216,12 +215,8 @@ const GetScrollLine = (Lines: LyricsLine[] | LyricsSyllable[], ProcessedPosition
   return enhance(lastIdx - firstIdx <= 1 ? firstIdx : lastIdx);
 };
 
-// Gap above the active line in "Top" scrolling. A resized popup can leave only
-// a sliver of lyrics, where a fixed 50px pushed the line into the bottom fade,
-// so in PiP it shrinks with the viewport, staying just inside the mask's top
-// fade, which scales too (.spicy-pip-wrapper in Lyrics/main.css).
-const GetTopScrollOffset = (container: HTMLElement) =>
-  IsPIP ? Math.min(50, Math.round(container.clientHeight * 0.2)) : 85;
+// Keep the active line clear of the top mask in "Top" scrolling.
+const GetTopScrollOffset = () => 85;
 
 const ScrollTo = (
   container: HTMLElement,
