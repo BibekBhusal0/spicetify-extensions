@@ -1,6 +1,6 @@
 # Spicy Lyrics
 
-Spicy Lyrics is a fork of [Spikerko's Spicy Lyrics](https://github.com/Spikerko/spicy-lyrics). This fork keeps the lyrics view minimal, removing many things and keeping it performant.
+Spicy Lyrics is a fork of [Spikerko's Spicy Lyrics](https://github.com/Spikerko/spicy-lyrics). This fork keeps the lyrics view minimal and removes popup lyrics, background animation, and the sidebar lyrics card. The page background can show cover art, an artist image, or cover colors, with adjustable blur.
 
 ## Install
 
@@ -22,7 +22,7 @@ bun run build
 
 ## Performance
 
-This fork is more performance efficient by using a static cover background and removing background animation, popup lyrics, and the custom sidebar card. You can reduce work further by:
+The extension no longer renders an animated background or popup lyrics. To reduce work further:
 
 - Turn off lyric effects you do not use, such as word animation and smooth scrolling.
 - Keep the lyric view closed when you do not need it.

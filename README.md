@@ -4,7 +4,7 @@ Personal Spotify extensions and an Omarchy theme.
 
 ## Extensions
 
-- [Spicy Lyrics](spicy-lyrics/README.md): lyrics view and fullscreen controls, with minimal styling and a static cover background.
+- [Spicy Lyrics](spicy-lyrics/README.md): lyrics view and fullscreen controls, with static background choices and adjustable blur.
 - [Keymap](keymap/README.md): vim-style keyboard shortcuts for Spotify.
 
 ## Omarchy theme
