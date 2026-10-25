@@ -1,0 +1,126 @@
+:root {
+  --br-1: 10px;
+  --br-2: 8px;
+}
+
+/* background: flatten header gradients (they also animate on hover) */
+.main-home-homeHeader,
+.main-entityHeader-backgroundColor,
+.main-actionBarBackground-background {
+  display: none;
+}
+.main-topBar-overlay,
+.main-topBar-background {
+  background-color: var(--spice-main) !important;
+}
+
+.main-nowPlayingBar-nowPlayingBar {
+  position: relative;
+}
+.main-nowPlayingBar-center .playback-progressbar {
+  position: absolute;
+  left: -7px;
+  right: -7px;
+  bottom: 74px;
+}
+.playback-bar {
+  --bar: var(--spice-text);
+}
+.main-nowPlayingBar-volumeBar {
+  --bar: var(--spice-subtext);
+  margin-right: 8px;
+}
+.playback-bar .progress-bar {
+  --progress-bar-radius: 0;
+  --progress-bar-height: 8px;
+}
+.x-progressBar-progressBarBg {
+  background-color: var(--spice-button-disabled);
+}
+.progress-bar__slider {
+  display: block;
+  background-color: var(--spice-shadow);
+  border: 2px solid var(--bar);
+  height: 16px;
+  width: 16px;
+}
+.playback-bar .progress-bar__slider {
+  height: 20px;
+  width: 20px;
+}
+.main-nowPlayingBar-volumeBar .progress-bar__slider {
+  border-width: 2px !important;
+  border-style: solid !important;
+  border-color: var(--bar) !important;
+  height: 14px;
+  width: 14px;
+}
+
+/* times: one "elapsed / remaining" cluster at the bar's right end; the extra
+   controls shift left to reserve that space */
+.main-nowPlayingBar-extraControls {
+  margin-right: 75px;
+}
+.playback-bar__progress-time-elapsed,
+.main-playbackBarRemainingTime-container {
+  position: absolute;
+  bottom: 30px;
+  margin: 0;
+  line-height: 1;
+  color: var(--spice-text);
+}
+.playback-bar__progress-time-elapsed {
+  right: 38px;
+}
+.playback-bar__progress-time-elapsed::after {
+  content: ' /';
+}
+.main-playbackBarRemainingTime-container {
+  right: 8px;
+  width: 44px;
+  text-align: right;
+}
+.player-controls__buttons {
+  margin: 0;
+}
+.player-controls__buttons button:not(.main-playPauseButton-button) {
+  color: var(--spice-button) !important;
+}
+.main-genericButton-button {
+  color: var(--spice-button) !important;
+}
+.main-playPauseButton-button {
+  background-color: var(--spice-button);
+  color: var(--spice-shadow) !important;
+}
+.connect-device-list-content {
+  border-radius: var(--br-1);
+  border: 1px solid var(--spice-button-disabled);
+  padding: 12px;
+}
+.connect-device-list-item:hover {
+  background-color: var(--spice-button-disabled);
+  border-radius: var(--br-2);
+}
+.cover-art-image {
+  border-radius: calc(var(--br-2) / 2);
+}
+.main-coverSlotCollapsed-container[aria-hidden='true'] .cover-art-image {
+  border-radius: var(--br-1);
+}
+
+/* fullscreen player */
+.npv-main-container .npv-cross-fade-image {
+  border-radius: calc(var(--br-1) * 3);
+}
+.npv-up-next {
+  background: var(--spice-card) !important;
+  border: none !important;
+  border-radius: var(--br-1);
+}
+.npv-up-next__image {
+  border-radius: var(--br-2);
+}
+.npv-header__metadata {
+  color: var(--spice-text);
+}
