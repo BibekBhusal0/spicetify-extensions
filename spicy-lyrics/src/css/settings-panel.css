@@ -288,15 +288,21 @@ sl-generic-modal.SpicyLyricsModal .sl-modal-overlay {
     background: var(--spice-button);
   }
 
-  .sl-sp-slider button {
+  .sl-sp-slider button,
+  .sl-sp-btn {
     padding: 6px 10px;
     border-radius: 999px;
-    background: var(--spice-sidebar);
+    background: rgba(255, 70, 70, 0.15);
+    color: #ff4646;
+    border: 1px solid rgba(255, 70, 70, 0.3);
     font-size: 12px;
+    font-weight: 600;
   }
 
-  .sl-sp-slider button:hover {
-    background: var(--spice-main);
+  .sl-sp-slider button:hover,
+  .sl-sp-btn:hover {
+    background: rgba(255, 70, 70, 0.25);
+    border-color: rgba(255, 70, 70, 0.5);
   }
 
   .sl-sp-slider output {
