@@ -671,20 +671,11 @@
   .MediaContent
   .ViewControls
   .ViewControl {
-  background: var(--material-regular-bg) !important;
-  border: 0 !important;
-  -webkit-backdrop-filter: var(--material-regular-blur) !important;
-  backdrop-filter: var(--material-regular-blur) !important;
-  box-shadow:
-    0 10px 24px -8px rgba(8, 10, 18, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.36),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.18) !important;
-  color: var(--color-text-primary) !important;
+  background: var(--spice-sidebar) !important;
+  border: 1px solid var(--spice-main) !important;
+  color: var(--spice-text) !important;
 }
 
-/* Fullscreen :hover — re-apply the luminous halo (needs !important to
-   beat the base rule above that locks box-shadow with !important). */
 #SpicyLyricsPage.Fullscreen
   .ContentBox
   .NowBar
@@ -694,13 +685,7 @@
   .MediaContent
   .ViewControls
   .ViewControl:hover {
-  background: rgba(255, 255, 255, 0.12) !important;
-  box-shadow:
-    0 14px 32px -8px rgba(8, 10, 18, 0.5),
-    0 0 22px -4px rgba(255, 255, 255, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.48),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.24) !important;
+  background: var(--spice-sidebar) !important;
 }
 
 #SpicyLyricsPage.Fullscreen
@@ -724,17 +709,15 @@
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
   color: var(--spice-text) !important;
-  transition: background-color 120ms ease, color 120ms ease !important;
 }
 
 #SpicyLyricsPage .ViewControls .ViewControl:hover {
-  background: var(--spice-button) !important;
-  color: var(--spice-main) !important;
-  scale: 1 !important;
+  background: var(--spice-sidebar) !important;
+  color: var(--spice-text) !important;
 }
 
 #SpicyLyricsPage .ViewControls .ViewControl:active {
-  scale: 1 !important;
+  background: var(--spice-sidebar) !important;
 }
 
 #SpicyLyricsPage.Fullscreen
