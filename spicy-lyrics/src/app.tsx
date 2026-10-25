@@ -19,7 +19,6 @@ import ApplyDynamicBackground, {
 } from "./components/DynamicBG/dynamicBackground.ts";
 import { isExperimentEnabled } from "./utils/experiments.ts";
 import "./components/DynamicBG/CanvasImmersive.ts";
-import "./components/DynamicBG/NpvCanvasBackground.ts";
 import {
   $currentLyricsData,
   $removeSpotifyLyricsButton,

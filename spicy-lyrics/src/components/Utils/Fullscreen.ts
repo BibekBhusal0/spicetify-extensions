@@ -237,7 +237,6 @@ function hideMainElement(mainElement: HTMLElement) {
   for (const [property, value] of Object.entries(HIDDEN_MAIN_STYLES)) {
     mainElement.style.setProperty(property, value);
   }
-  SetKawarpSuspended("npvbg", true);
 }
 
 /* Spotify draws its menu button (top left) and window buttons (top right) natively over the web
@@ -294,7 +293,6 @@ function clearNativeChromeInsets(page: HTMLElement) {
 }
 
 function showMainElement() {
-  SetKawarpSuspended("npvbg", false);
   const mainElement = document.querySelector<HTMLElement>("#main");
   if (!mainElement) return;
   for (const property of Object.keys(HIDDEN_MAIN_STYLES)) {
