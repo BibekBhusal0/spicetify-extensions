@@ -14,6 +14,7 @@ import "./css/font-pack/font-pack.css";
 import ApplyStaticBackground from "./components/Styling/StaticBackground.ts";
 import {
   $currentLyricsData,
+  $npvSidebarBehavior,
   $removeSpotifyLyricsButton,
   $spicyLyricsVersion,
   $developerMode,
@@ -76,27 +77,6 @@ async function main() {
   await Platform.OnSpotifyReady;
 
   guardSpicetifyScrollingFix();
-
-  // Close NPV by default on first launch
-  const setupNPVDefault = () => {
-    try {
-      const rightSidebarKey = Object.keys(localStorage).find(k => k.includes(':ui.right_sidebar_content'));
-      if (!rightSidebarKey) return;
-      
-      const savedState = localStorage.getItem(rightSidebarKey);
-      
-      // If never set or currently open, close it
-      if (!savedState || savedState === '"now_playing_view"') {
-        const npvButton = document.querySelector('[aria-label*="Now Playing"]');
-        const sidebar = document.querySelector('.Root__right-sidebar');
-        if (npvButton && sidebar && sidebar.offsetWidth > 32) {
-          setTimeout(() => npvButton.click(), 100);
-        }
-      }
-    } catch (e) {}
-  };
-
-  setTimeout(setupNPVDefault, 1000);
 
   if (needsMigration()) {
     showMigrationModal();
@@ -431,6 +411,26 @@ async function main() {
     $removeSpotifyLyricsButton.subscribe((v) => {
       document.body.classList.toggle("SpicyLyrics_RemoveSpotifyLyricsButton", v);
     });
+
+    // NPV sidebar control
+    function applyNpvSidebarBehavior(behavior: string) {
+      const userId = Spicetify.Platform.AuthorizationAPI._tokenProvider?._data?.split(":")[0];
+      if (!userId) return;
+      
+      const storageKey = `${userId}:ui.right_sidebar_content`;
+      
+      if (behavior === "always-close") {
+        Spicetify.LocalStorage.set(storageKey, "disabled");
+      } else if (behavior === "always-open") {
+        Spicetify.LocalStorage.set(storageKey, "now_playing_view");
+      }
+    }
+
+    $npvSidebarBehavior.subscribe((behavior) => {
+      applyNpvSidebarBehavior(behavior);
+    });
+
+    setTimeout(() => applyNpvSidebarBehavior($npvSidebarBehavior.get()), 1000);
 
     let songChangeSeen = false;
     async function onSongChange(event: any) {

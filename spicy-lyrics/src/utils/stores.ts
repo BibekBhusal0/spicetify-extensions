@@ -90,6 +90,8 @@ export const $timelineOutsideMediaContent = persistAtom<boolean>(
 );
 // Volume band below the playback controls in Fullscreen and Cinema View.
 export const $showVolumeSlider = persistAtom<boolean>("showVolumeSlider", true);
+// Control Spotify's Now Playing View sidebar: "remember" | "always-close" | "always-open"
+export const $npvSidebarBehavior = persistAtom<string>("npvSidebarBehavior", "remember");
 // Playback timing offset in milliseconds (bipolar: negative = earlier, positive = later)
 export const $playbackOffset = persistAtom<number>("playbackOffset", 0);
 // Clicking a line seeks this much earlier, so Spotify's ~300ms fade-in on seek
