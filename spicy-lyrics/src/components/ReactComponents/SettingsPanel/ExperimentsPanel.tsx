@@ -76,10 +76,9 @@ const FLASH: Keyframe[] = [
 ];
 const FLASH_TIMING: KeyframeAnimationOptions = { duration: 280, easing: "ease-out" };
 
-/** "Checking for changes", beside the Experiments title. */
+/** Status indicator beside the Experiments title. */
 export function SyncStatus() {
   const syncing = useExperimentsSyncing();
-  // The spinner is always mounted; it only runs while the pill shows, not for as long as the tab is open.
   const spinning = useTrailing(syncing, SPIN_TRAIL_MS);
   return (
     <span
@@ -90,7 +89,7 @@ export function SyncStatus() {
       aria-hidden={!syncing}
     >
       <span className="sl-sp-sync-spinner" aria-hidden="true" />
-      Checking for changes
+      Syncing
     </span>
   );
 }
