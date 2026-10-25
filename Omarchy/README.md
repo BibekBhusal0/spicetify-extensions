@@ -1,30 +1,34 @@
-# Omarchy theme for Spicetify
+# Omarchy theme for Spotify
 
-This theme applies the repository's Spotify CSS overrides and maps the active Omarchy palette into Spicetify colors.
+This Spicetify theme follows the active Omarchy palette. The `theme-hook.sh` script regenerates Spicetify's colors and reloads Spotify's UI when the palette changes. The generated `color.ini` varies by theme and is not tracked by Git.
 
 ## Install
 
-The Omarchy installer clones this repository, links the `Omarchy` folder into Spicetify's `Themes` directory, and links `theme-hook.sh` into Omarchy's `theme-set.d` hooks. To install by hand on Omarchy, run:
+Copy the theme CSS and hook into their configuration folders:
 
 ```bash
-mkdir -p ~/.config/spicetify/Themes ~/.config/omarchy/hooks/theme-set.d
-ln -sfn ~/Code/spicetify-extensions/Omarchy ~/.config/spicetify/Themes/Omarchy
-ln -sfn ~/Code/spicetify-extensions/Omarchy/theme-hook.sh ~/.config/omarchy/hooks/theme-set.d/spicetify.sh
+mkdir -p ~/.config/spicetify/Themes/Omarchy ~/.config/omarchy/hooks/theme-set.d
+cp Omarchy/user.css ~/.config/spicetify/Themes/Omarchy/user.css
+cp Omarchy/theme-hook.sh ~/.config/omarchy/hooks/theme-set.d/spicetify.sh
+chmod +x ~/.config/omarchy/hooks/theme-set.d/spicetify.sh
 spicetify config current_theme Omarchy color_scheme omarchy
-spicetify apply
-bash ~/.config/omarchy/hooks/theme-set.d/spicetify.sh
 ```
 
-Spotify must have launched and Spicetify must have a backup before the theme can apply. On a first install, open Spotify, log in, then rerun the Omarchy installer or run the commands above.
+Generate the initial palette before applying the theme:
 
-## Theme colors
+```bash
+bash ~/.config/omarchy/hooks/theme-set.d/spicetify.sh
+spicetify apply
+```
 
-`color.ini` is generated in this folder by `theme-hook.sh`. It is ignored by Git because the hook rewrites it whenever the active Omarchy theme changes. The installer runs the hook before `spicetify apply` to create the color scheme, then runs it again to refresh Spotify's generated files. Later theme changes run the same hook automatically and refresh the Spotify UI without restarting the client.
+Spotify must be installed, and Omarchy's `omarchy-theme-color` command must be available. On a new machine, launch Spotify and sign in first. If Spicetify has not backed up the client yet, run `spicetify backup`, then initialize colors and apply the theme. The first Spotify launch may still use the default appearance until `spicetify apply` has completed.
 
-If colors have not initialized, run:
+## Color updates
+
+Omarchy runs scripts in `~/.config/omarchy/hooks/theme-set.d` after each theme change. The copied hook creates `color.ini` in the installed theme folder, updates Spotify's generated `colors.css` and `user.css`, and reloads the Spotify UI through the configured CEF debug port. It does not restart Spotify. Run the hook manually whenever colors need to be initialized or refreshed:
 
 ```bash
 bash ~/.config/omarchy/hooks/theme-set.d/spicetify.sh
 ```
 
-The hook uses `omarchy-theme-color`, writes Spicetify's palette files under `/opt/spotify/Apps/xpui`, and reloads Spotify over the configured remote debugging port. Spotify must be running for the reload to happen.
+The hook expects Spotify under `/opt/spotify` and uses port `9222` when no debug port is found in `~/.config/spotify-flags.conf`.

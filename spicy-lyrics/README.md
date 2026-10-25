@@ -1,10 +1,10 @@
-# spicy-lyrics
+# Spicy Lyrics
 
-This is a fork of [Spicy Lyrics](https://github.com/Spikerko/spicy-lyrics). It keeps the lyrics and full-screen features and removes the custom styling and background behavior for Spotify's Now Playing View sidebar. The sidebar uses Spotify's own styling.
+Spicy Lyrics is a fork of [Spikerko's Spicy Lyrics](https://github.com/Spikerko/spicy-lyrics). This fork keeps the lyrics view minimal, removing many things and keeping it performant.
 
 ## Install
 
-The Omarchy setup links this build and enables it automatically. For a manual install, copy `dist/spicy-lyrics.js` into Spicetify's `Extensions` folder, then run:
+Copy `dist/spicy-lyrics.js` into Spicetify's `Extensions` directory, then enable and apply it:
 
 ```bash
 spicetify config extensions spicy-lyrics.js
@@ -13,11 +13,18 @@ spicetify apply
 
 ## Build
 
-From this directory, run:
+From this directory:
 
 ```bash
 bun install
 bun run build
 ```
 
-The project retains the upstream GPL-3.0 license. The source changes in this fork remove Now Playing View sidebar styling and its observers.
+## Performance
+
+This fork is more performance efficient by using a static cover background and removing background animation, popup lyrics, and the custom sidebar card. You can reduce work further by:
+
+- Turn off lyric effects you do not use, such as word animation and smooth scrolling.
+- Keep the lyric view closed when you do not need it.
+
+Spicy Lyrics retains the upstream GPL-3.0 license and attribution.
