@@ -69,7 +69,16 @@
 		"ctrl+up": { callback: () => Spicetify.Player.setVolume(Spicetify.Player.getVolume() + 0.05) },
 		"ctrl+down": { callback: () => Spicetify.Player.setVolume(Spicetify.Player.getVolume() - 0.05) },
 
-		f: { callback: () => document.querySelector('.main-nowPlayingBar-extraControls button[aria-label="Lyrics"]')?.click() },
+		f: {
+			callback: () => {
+				const spicyLyrics = document.querySelector("#SpicyLyrics_FullscreenButton");
+				if (spicyLyrics) {
+					spicyLyrics.click();
+					return;
+				}
+				document.querySelector('.main-nowPlayingBar-extraControls button[aria-label="Lyrics"], button[data-testid="lyrics-button"]')?.click();
+			},
+		},
 
 		// Activate Vim mode (clickable elements get letter-key labels)
 		"shift+f": {
@@ -122,7 +131,7 @@
 			["Panels", [
 				["Ctrl+b", "Toggle library sidebar"],
 				["Ctrl+Shift+b", "Toggle now playing view"],
-				["f", "Toggle lyrics"],
+				["f", "Open lyrics fullscreen"],
 			]],
 			["Other", [
 				["Shift+f", "Click-on-element vim mode"],

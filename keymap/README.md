@@ -1,8 +1,10 @@
-# keymap
+# Keymap
 
-Vim-style keyboard shortcuts for Spotify. The extension adds scrolling, track and volume controls, navigation, panel toggles, and a `?` help dialog.
+Keyboard shortcuts for navigating and controlling Spotify with vim-style keys.
 
-The Omarchy installer links `keymap.js` from the separate `spicetify-keys` repository. To install manually, put `keymap.js` in Spicetify's `Extensions` folder, then run:
+## Install
+
+Copy `keymap.js` into Spicetify's `Extensions` directory, then enable and apply it:
 
 ```bash
 spicetify config extensions keymap.js
@@ -14,7 +16,8 @@ spicetify apply
 - Scrolling: `j` / `k`, `d` / `u`, `gg` / `Shift+g`
 - Playback: `n` / `p`, `a` / `m`, `s`, `l`, `Ctrl+←/→`, `Ctrl+↑/↓`
 - Navigation: `h`, `/`, `q`, `Shift+l`
-- Panels: `Ctrl+b`, `Ctrl+Shift+b`, `f`
+- Panels: `Ctrl+b`, `Ctrl+Shift+b`
+- Lyrics: `f` opens the lyrics view in fullscreen
 - Other: `Shift+f`, `?`, `Esc`, `Ctrl+q`
 
-Press `?` to open the help dialog. While it is open, `j`, `k`, `d`, and `u` scroll its contents. Click outside it or press `Esc` to close it. The extension does not change Spotify playback state except when a playback shortcut is used.
+Press `?` to view the shortcut list.
