@@ -2,13 +2,12 @@ import { useStore } from "@nanostores/react";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { $experimentOverrides } from "../../../utils/experiments.ts";
 import { PopupModal } from "../../Modal.ts";
-import About, { useUpdateStatus } from "./About.tsx";
 import { advancedSection } from "./AdvancedSection.tsx";
 import { appearanceSection } from "./AppearanceSection.tsx";
 import { backgroundSection } from "./BackgroundSection.tsx";
 import { Highlight, Row, SearchBar } from "./components.tsx";
 import { experimentsSection } from "./ExperimentsSection.tsx";
-import { AboutIcon, ChevronIcon, CloseIcon } from "./icons.tsx";
+import { ChevronIcon, CloseIcon } from "./icons.tsx";
 import { interfaceSection } from "./InterfaceSection.tsx";
 import { lyricsSection } from "./LyricsSection.tsx";
 import {
@@ -21,13 +20,6 @@ import {
 } from "./model.ts";
 import { playbackSection } from "./PlaybackSection.tsx";
 
-const aboutSection: SectionDef = {
-  id: "about",
-  title: "About",
-  icon: AboutIcon,
-  secondary: true,
-};
-
 const SECTIONS: SectionDef[] = [
   lyricsSection,
   playbackSection,
@@ -36,7 +28,6 @@ const SECTIONS: SectionDef[] = [
   appearanceSection,
   experimentsSection,
   advancedSection,
-  aboutSection,
 ];
 
 const sectionById = (id: SectionId) => SECTIONS.find((s) => s.id === id) ?? SECTIONS[0];
@@ -102,7 +93,6 @@ export default function SettingsPanel() {
   // Pointer-driven tab changes get a short fade. Keyboard changes and typing
   // swap instantly: they repeat too often for motion to be anything but drag.
   const [instant, setInstant] = useState(true);
-  const updateStatus = useUpdateStatus();
 
   const searchRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -221,9 +211,6 @@ export default function SettingsPanel() {
         <span className="sl-sp-tab-icon">{s.icon}</span>
         <span className="sl-sp-tab-label">{s.title}</span>
         {count !== null && count > 0 && <span className="sl-sp-tab-count">{count}</span>}
-        {count === null && s.id === "about" && updateStatus === "outdated" && (
-          <span className="sl-sp-tab-dot" aria-label="Update available" />
-        )}
       </button>
     );
   };
@@ -313,8 +300,6 @@ export default function SettingsPanel() {
                   <p className="sl-sp-empty-hint">Check the spelling, or try a shorter word.</p>
                 </div>
               )
-            ) : section.id === "about" ? (
-              <About status={updateStatus} />
             ) : (
               <>
                 {section.intro && <p className="sl-sp-intro">{section.intro}</p>}
