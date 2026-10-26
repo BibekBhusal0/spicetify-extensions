@@ -1238,27 +1238,3 @@
   outline-offset: 2px;
 }
 
-#SpicyLyricsPage.SpicyRenderer:not(.NoLineHoverBackground) .LyricsContainer .LyricsContent .SpicyLyricsScrollContainer:not([data-lyrics-type="Static"]) .line:not(.musical-line)::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  transform: translate(calc((.25cqw * 2) * -1), -50%);
-  width: calc(100% + .25cqw * 2);
-  height: calc(100% + .85cqw * 2);
-  background-color: rgba(255, 255, 255, 0.1);
-  /* The blur is only applied while hovered (see below). Left on at rest, every
-     line carried an invisible backdrop-filter layer the compositor still had
-     to process each frame. It fades with the opacity, so nothing pops. */
-  backdrop-filter: none;
-  opacity: 0;
-  scale: 0.9;
-  border-radius: 16px;
-  transition: opacity .25s ease, backdrop-filter .25s ease, scale .4s linear(0, 0.013 1%, 0.051 2.2%, 0.404 9.8%, 0.51 12.6%, 0.602 15.5%, 0.683 18.7%, 0.754 22.2%, 0.813 26%, 0.861 30.2%, 0.9 34.8%, 0.931 40%, 0.972 52.7%, 0.992 70.2%, 1);
-  transform-origin: center center;
-}
-
-#SpicyLyricsPage.SpicyRenderer:not(.NoLineHoverBackground) .LyricsContainer .LyricsContent .SpicyLyricsScrollContainer:not([data-lyrics-type="Static"]) .line:hover::before {
-  opacity: 1;
-  scale: 1.05;
-  backdrop-filter: blur(2px);
-}
