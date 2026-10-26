@@ -20,6 +20,8 @@ export function openSettingsPanel() {
     content: container,
     isLarge: true,
     modalId: MODAL_ID,
+    // The panel handles Escape itself: first press clears the search box.
+    closeOnEscape: false,
     onClose: () => root.unmount(),
   });
 }

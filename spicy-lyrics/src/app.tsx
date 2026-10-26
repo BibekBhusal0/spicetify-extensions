@@ -51,7 +51,7 @@ import { runThemeMatcher } from "./utils/themeMatcher.ts";
 import { guardSpicetifyScrollingFix } from "./utils/scrollFixGuard.ts";
 import "./utils/settings.ts";
 import SLToaster from "./components/ReactComponents/SLToaster.tsx";
-import { registerSettingsMenu } from "./utils/settings.ts";
+import { registerSettingsMenu, openSettingsPanel } from "./utils/settings.ts";
 import { exposeToWindow } from "./utils/expose.ts";
 import Logger from "./utils/Logger.ts";
 import Whentil from "./modules/Whentil.ts";
@@ -857,6 +857,11 @@ async function main() {
         }
       }
     });
+
+    Spicetify.Keyboard.registerImportantShortcut(
+      { key: ",", ctrl: true, shift: true },
+      () => openSettingsPanel()
+    );
   }, 3000);
 
   document.addEventListener("fullscreenchange", async () => {

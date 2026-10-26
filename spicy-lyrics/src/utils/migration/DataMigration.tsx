@@ -169,5 +169,6 @@ export function showMigrationModal() {
     onClose: () => reactRoot.unmount(),
     closeBtn: false,
     closeOnOutsideClick: false,
+    closeOnEscape: false,
   });
 }

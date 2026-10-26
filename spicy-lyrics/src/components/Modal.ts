@@ -5,6 +5,8 @@ type ModalDisplayOptions = {
 	onClose?: (() => void) | null;
 	closeBtn?: boolean;
 	closeOnOutsideClick?: boolean;
+	/** Close on Escape. Defaults to true; mirrors the close button, including any closeHandler. */
+	closeOnEscape?: boolean;
 	/** Replaces the default hide() behavior for the close button and outside-click. */
 	closeHandler?: (() => void) | null;
 	/** Optional class appended to `.sl-modal` for per-modal styling/identification. */
@@ -24,12 +26,14 @@ type ModalTransitionOptions = {
 class _HTMLGenericModal extends HTMLElement {
 	private _onClose: (() => void) | null;
 	private _currentModalId: string | null;
+	private _onEscape: ((event: KeyboardEvent) => void) | null;
 
 	constructor() {
 		super();
 		this.classList.add("SpicyLyricsModal");
 		this._onClose = null;
 		this._currentModalId = null;
+		this._onEscape = null;
 	}
 
 	private _applyModalId(modalId: string | null | undefined): void {
@@ -45,6 +49,7 @@ class _HTMLGenericModal extends HTMLElement {
 	}
 
 	hide(): void {
+        this._removeEscapeHandler();
         const capturedOnClose = this._onClose;
         this._onClose = null;
         this._currentModalId = null;
@@ -64,6 +69,12 @@ class _HTMLGenericModal extends HTMLElement {
         } else {
             _removeFromDom(0);
         }
+	}
+
+	private _removeEscapeHandler(): void {
+		if (!this._onEscape) return;
+		document.removeEventListener("keydown", this._onEscape, true);
+		this._onEscape = null;
 	}
 
 	/**
@@ -105,7 +116,7 @@ class _HTMLGenericModal extends HTMLElement {
 	 * @param {boolean} [options.closeBtn=true] - Show modal close button
 	 * @param {boolean} [options.closeOnOutsideClick=true] - Allow closing modal by clicking outside
 	 */
-	display({ title, content, isLarge = false, onClose = null, closeBtn = true, closeOnOutsideClick = true, closeHandler = null, modalId = null }: ModalDisplayOptions): void {
+	display({ title, content, isLarge = false, onClose = null, closeBtn = true, closeOnOutsideClick = true, closeHandler = null, modalId = null, closeOnEscape = true }: ModalDisplayOptions): void {
 		// If a previous onClose exists, call it before displaying a new popup
 		if (typeof this._onClose === "function") {
 			this._onClose();
@@ -113,6 +124,7 @@ class _HTMLGenericModal extends HTMLElement {
 		this._onClose = onClose;
 		// Reset tracked modalId since innerHTML below replaces the previous `.sl-modal` element.
 		this._currentModalId = null;
+		this._removeEscapeHandler();
 		this.innerHTML = `
 <div class="sl-modal-overlay sl-modal-overlay-animated" style="z-index: 100;">
 	<div class="sl-modal" tabindex="-1" role="dialog" aria-label="${title}" aria-modal="true">
@@ -148,6 +160,20 @@ class _HTMLGenericModal extends HTMLElement {
 			overlay.addEventListener("click", (event: MouseEvent) => {
 				if (closeOnOutsideClick && pressedOverlay && event.target === event.currentTarget) hidePopup();
 			});
+		}
+
+		if (closeOnEscape) {
+			this._onEscape = (event: KeyboardEvent) => {
+				if (event.key !== "Escape") return;
+				// Keeps Spotify's own Escape shortcut from also firing.
+				event.preventDefault();
+				event.stopImmediatePropagation();
+				// Follow whatever the close button currently does; transitions rebind it.
+				const closeButton = this.querySelector<HTMLButtonElement>(".sl-modal-close-btn");
+				if (closeButton) closeButton.click();
+				else hidePopup();
+			};
+			document.addEventListener("keydown", this._onEscape, true);
 		}
 
 		if (main) {
