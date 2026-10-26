@@ -7,21 +7,27 @@ export const init = (): Promise<void> => {
     return Promise.resolve();
   }
 
-  return new Promise(async (resolve, reject) => {
-    await RetrievePackage("Kuromoji", "1.0.0", "js");
-    while (!(window as any).kuromoji) {
-      await new Promise((r) => setTimeout(r, 50));
-    }
-    (window as any).kuromoji.builder({
-      dicPath: "https://kuromoji.pkgs.spikerko.org",
-    }).build((error: any, analyzer: any) => {
-      if (error) {
-        return reject(error);
-      }
+  return new Promise<void>((resolve, reject) => {
+    void (async () => {
+      try {
+        await RetrievePackage("Kuromoji", "1.0.0", "js");
+        while (!(window as any).kuromoji) {
+          await new Promise((r) => setTimeout(r, 50));
+        }
+        (window as any).kuromoji.builder({
+          dicPath: "https://kuromoji.pkgs.spikerko.org",
+        }).build((error: any, analyzer: any) => {
+          if (error) {
+            return reject(error);
+          }
 
-      Analyzer = analyzer;
-      resolve();
-    });
+          Analyzer = analyzer;
+          resolve();
+        });
+      } catch (error) {
+        reject(error);
+      }
+    })();
   });
 };
 export const parse = (text = ""): Promise<any> => {

@@ -9,8 +9,6 @@ function Until<T>(
     maxRepeats: number = Infinity
 ): CancelableTask {
     let isCancelled = false;
-    // deno-lint-ignore no-unused-vars
-    let hasReset = false;
     let executedCount = 0;
 
     const resolveStatement = (): T => (typeof statement === 'function' ? (statement as () => T)() : statement);
@@ -35,7 +33,6 @@ function Until<T>(
         Reset() {
             if (executedCount >= maxRepeats || isCancelled) {
                 isCancelled = false;
-                hasReset = true;
                 executedCount = 0;
                 runner();
             }
@@ -51,8 +48,6 @@ function When<T>(
     timeoutMs?: number
 ): CancelableTask {
     let isCancelled = false;
-    // deno-lint-ignore no-unused-vars
-    let hasReset = false;
     let executionsRemaining = repeater;
     let deadline = timeoutMs === undefined ? Infinity : performance.now() + timeoutMs;
 
@@ -65,8 +60,7 @@ function When<T>(
         let conditionMet: T;
         try {
             conditionMet = resolveStatement();
-        // deno-lint-ignore no-unused-vars
-        } catch (error) {
+        } catch {
             // The thing being waited on isn't there yet — keep polling.
             setTimeout(runner, 25);
             return;
@@ -97,7 +91,6 @@ function When<T>(
         Reset() {
             if (executionsRemaining <= 0 || isCancelled) {
                 isCancelled = false;
-                hasReset = true;
                 executionsRemaining = repeater;
                 deadline = timeoutMs === undefined ? Infinity : performance.now() + timeoutMs;
                 runner();

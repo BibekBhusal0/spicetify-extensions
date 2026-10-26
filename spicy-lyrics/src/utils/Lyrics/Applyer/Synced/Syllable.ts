@@ -263,11 +263,8 @@ export function ApplySyllableLyrics(data: LyricsData, UseRomanized: boolean = fa
         word = document.createElement("div");
         Emphasize(letters, word, lead);
 
-        iL === aL.length - 1
-          ? word.classList.add("LastWordInLine")
-          : lead.IsPartOfWord
-            ? word.classList.add("PartOfWord")
-            : null;
+        if (iL === aL.length - 1) word.classList.add("LastWordInLine");
+        else if (lead.IsPartOfWord) word.classList.add("PartOfWord");
 
         if (!$simpleLyricsMode.get()) {
           word.style.setProperty("--text-shadow-opacity", `0%`);
@@ -288,11 +285,8 @@ export function ApplySyllableLyrics(data: LyricsData, UseRomanized: boolean = fa
 
         word.classList.add("word");
 
-        iL === aL.length - 1
-          ? word.classList.add("LastWordInLine")
-          : lead.IsPartOfWord
-            ? word.classList.add("PartOfWord")
-            : null;
+        if (iL === aL.length - 1) word.classList.add("LastWordInLine");
+        else if (lead.IsPartOfWord) word.classList.add("PartOfWord");
 
         if (LyricsObject.Types.Syllable.Lines[CurrentLineLyricsObject]?.Syllables?.Lead) {
           LyricsObject.Types.Syllable.Lines[CurrentLineLyricsObject].Syllables?.Lead.push({
@@ -372,11 +366,8 @@ export function ApplySyllableLyrics(data: LyricsData, UseRomanized: boolean = fa
             bwE = document.createElement("div");
             Emphasize(letters, bwE, bw, true);
 
-            bI === bA.length - 1
-              ? bwE.classList.add("LastWordInLine")
-              : bw.IsPartOfWord
-                ? bwE.classList.add("PartOfWord")
-                : null;
+            if (bI === bA.length - 1) bwE.classList.add("LastWordInLine");
+            else if (bw.IsPartOfWord) bwE.classList.add("PartOfWord");
 
             if (!$simpleLyricsMode.get()) {
               bwE.style.setProperty("--text-shadow-opacity", `0%`);
@@ -411,11 +402,8 @@ export function ApplySyllableLyrics(data: LyricsData, UseRomanized: boolean = fa
             bwE.classList.add("bg-word");
             bwE.classList.add("word");
 
-            bI === bA.length - 1
-              ? bwE.classList.add("LastWordInLine")
-              : bw.IsPartOfWord
-                ? bwE.classList.add("PartOfWord")
-                : null;
+            if (bI === bA.length - 1) bwE.classList.add("LastWordInLine");
+            else if (bw.IsPartOfWord) bwE.classList.add("PartOfWord");
           }
 
           const prevBG = bA[bI - 1];

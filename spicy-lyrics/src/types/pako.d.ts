@@ -1,3 +1,5 @@
+// Duplicate values are intentional aliases in the pako API.
+// oxlint-disable typescript/no-duplicate-enum-values
 // Type definitions made by @DefinitelyTyped (on Github)
 
 declare namespace pako {

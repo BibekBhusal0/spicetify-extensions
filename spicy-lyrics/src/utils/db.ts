@@ -28,7 +28,7 @@ export async function ensurePersistence() {
       dbLogger.debug("Data persistence request was accepted")
     }
     return granted;
-  } catch (e) {
+  } catch {
     dbLogger.warn("Persistence check failed")
     return false;
   }

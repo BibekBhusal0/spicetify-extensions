@@ -503,7 +503,7 @@ class LyricsVirtualizer {
     });
     this._allElements = lineElements;
     this._indexByElement = new Map(lineElements.map((el, i) => [el, i]));
-    this._wrappers = new Array(lineElements.length).fill(null);
+    this._wrappers = Array.from({ length: lineElements.length }, () => null);
     this._virtualContainer = virtualContainer;
     this._scrollEl = scrollEl;
     this._trailingCache = null;

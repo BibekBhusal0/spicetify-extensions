@@ -103,7 +103,7 @@ export class SLObjPack {
                     if (len > limits.arrayLength) {
                         throw new Error("SLObjPack pack: Array length exceeds limit");
                     }
-                    const out = new Array<JSONValue>(len);
+                    const out = Array.from({ length: len }) as JSONValue[];
                     for (let i = 0; i < len; i++) {
                         out[i] = snapshot(node[i], depth + 1);
                     }
@@ -385,7 +385,7 @@ export class SLObjPack {
                     validateCount(numKeys, limits.objectKeys, "object key");
                     // numKeys key pointers + numKeys values (≥1 slot each)
                     requireStream(numKeys * 2, "object");
-                    const keys = new Array<string>(numKeys);
+                    const keys = Array.from({ length: numKeys }) as string[];
                     for (let i = 0; i < numKeys; i++) keys[i] = readKey();
                     const obj: Record<string, JSONValue> = {};
                     for (let i = 0; i < numKeys; i++) safeSet(obj, keys[i], decode(depth + 1));
@@ -395,7 +395,7 @@ export class SLObjPack {
                     const numItems = readStream();
                     validateCount(numItems, limits.arrayLength, "array item");
                     requireStream(numItems, "array");
-                    const arr = new Array<JSONValue>(numItems);
+                    const arr = Array.from({ length: numItems }) as JSONValue[];
                     for (let i = 0; i < numItems; i++) arr[i] = decode(depth + 1);
                     return arr;
                 }
@@ -410,9 +410,9 @@ export class SLObjPack {
                     }
                     // numKeys schema key pointers + numItems*numKeys values
                     requireStream(numKeys + numItems * numKeys, "schema array");
-                    const keys = new Array<string>(numKeys);
+                    const keys = Array.from({ length: numKeys }) as string[];
                     for (let i = 0; i < numKeys; i++) keys[i] = readKey();
-                    const arr = new Array<JSONValue>(numItems);
+                    const arr = Array.from({ length: numItems }) as JSONValue[];
                     for (let i = 0; i < numItems; i++) {
                         const obj: Record<string, JSONValue> = {};
                         for (let k = 0; k < numKeys; k++) {
