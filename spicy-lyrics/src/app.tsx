@@ -412,25 +412,64 @@ async function main() {
       document.body.classList.toggle("SpicyLyrics_RemoveSpotifyLyricsButton", v);
     });
 
-    // NPV sidebar control
-    function applyNpvSidebarBehavior(behavior: string) {
-      const userId = Spicetify.Platform.AuthorizationAPI._tokenProvider?._data?.split(":")[0];
-      if (!userId) return;
-      
-      const storageKey = `${userId}:ui.right_sidebar_content`;
-      
-      if (behavior === "always-close") {
-        Spicetify.LocalStorage.set(storageKey, "disabled");
-      } else if (behavior === "always-open") {
-        Spicetify.LocalStorage.set(storageKey, "now_playing_view");
+    // Spotify owns this key, reads it once when the panel starts and stores it
+    // JSON-encoded, so the write only lands next launch: the panel already on
+    // screen gets moved through Spotify's own buttons instead.
+    const NPV_STORAGE_SUFFIX = ":ui.right_sidebar_content";
+    const npvStorageKey = () =>
+      Spicetify.Platform.username
+        ? `${Spicetify.Platform.username}${NPV_STORAGE_SUFFIX}`
+        : (Object.keys(window.localStorage).find((key) => key.endsWith(NPV_STORAGE_SUFFIX)) ?? null);
+
+    // Spotify keeps the next panel rendered off screen while the rail is
+    // collapsed, so a bounding box would match buttons that cannot be clicked.
+    function npvButton(label: string): HTMLButtonElement | undefined {
+      for (const button of document.querySelectorAll<HTMLButtonElement>("button")) {
+        if (button.getAttribute("aria-label") !== label) continue;
+        const rect = button.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) continue;
+        const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+        if (hit && button.contains(hit)) return button;
       }
+    }
+
+    const npvPanelOpen = () =>
+      (document.querySelector(".Root__right-sidebar")?.offsetWidth ?? 0) > 150;
+
+    function applyNpvSidebarBehavior(behavior: string) {
+      if (behavior === "remember") return;
+
+      const wantOpen = behavior === "always-open";
+      const storageKey = npvStorageKey();
+      if (storageKey) {
+        Spicetify.LocalStorage.set(storageKey, JSON.stringify(wantOpen ? "now_playing_view" : "disabled"));
+      }
+
+      if (!wantOpen) {
+        if (npvPanelOpen()) (npvButton("Hide Now Playing view") ?? npvButton("Close"))?.click();
+        return;
+      }
+      if (npvButton("Hide Now Playing view")) return;
+      if (npvPanelOpen()) {
+        // Another panel (Queue) is the one up: close it, then open ours.
+        npvButton("Close")?.click();
+        Whentil.When(() => !npvPanelOpen(), () => npvButton("Show Now Playing view")?.click(), 1, 5_000);
+        return;
+      }
+      npvButton("Show Now Playing view")?.click();
     }
 
     $npvSidebarBehavior.subscribe((behavior) => {
       applyNpvSidebarBehavior(behavior);
     });
 
-    setTimeout(() => applyNpvSidebarBehavior($npvSidebarBehavior.get()), 1000);
+    // The rail renders after this runs, and the buttons are what move it.
+    Whentil.When(
+      () => document.querySelector(".Root__right-sidebar"),
+      () => applyNpvSidebarBehavior($npvSidebarBehavior.get()),
+      1,
+      15_000
+    );
 
     let songChangeSeen = false;
     async function onSongChange(event: any) {
