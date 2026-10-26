@@ -39,8 +39,7 @@ export type SectionId =
   | "interface"
   | "appearance"
   | "experiments"
-  | "advanced"
-  | "about";
+  | "advanced";
 
 export interface SectionDef {
   id: SectionId;

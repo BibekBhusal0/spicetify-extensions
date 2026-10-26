@@ -27,7 +27,6 @@ import ApplyStaticBackground from "../Styling/StaticBackground.ts";
 import {
   $creditsFollowLastLine,
   $currentLyricsData,
-  $duetLinePadding,
   $joinSplitWords,
   $lineHoverBackground,
   $lyricsContainerExists,
@@ -35,7 +34,6 @@ import {
   $showVolumeSlider,
   $simpleLyricsMode,
   $skipSpicyFont,
-  $ttmlMakerMode,
   $viewControlsPosition,
 } from "../../utils/stores.ts";
 import Global from "../Global/Global.ts";
@@ -274,10 +272,6 @@ async function OpenPage(AppendTo: HTMLElement | undefined = undefined) {
     elem.classList.add("NoLineHoverBackground");
   }
 
-  if ($duetLinePadding.get()) {
-    elem.classList.add("DuetLinePadding");
-  }
-
   if ($creditsFollowLastLine.get()) {
     elem.classList.add("CreditsFollowLastLine");
   }
@@ -469,7 +463,6 @@ function AppendViewControls(ReAppend: boolean = false) {
   if (ReAppend) elem.innerHTML = "";
   const isNoLyrics =
     $currentLyricsData.get() === `NO_LYRICS:${SpotifyPlayer.GetUri()}`;
-  const isTTMLMakerMode = $ttmlMakerMode.get();
   elem.innerHTML = `
         ${
           Fullscreen.IsOpen || Fullscreen.CinemaViewOpen
@@ -512,11 +505,7 @@ function AppendViewControls(ReAppend: boolean = false) {
               }</button>`
             : ""
         }
-        ${
-          isTTMLMakerMode
-            ? `<button id="LyricsManager" class="ViewControl">${Icons.LyricsManager}</button>`
-            : ""
-        }
+        <button id="LyricsManager" class="ViewControl">${Icons.LyricsManager}</button>
         <button id="SettingsToggle" class="ViewControl">${Icons.Settings}</button>
         <button id="Close" class="ViewControl">${Icons.Close}</button>
     `;
@@ -733,7 +722,7 @@ function AppendViewControls(ReAppend: boolean = false) {
     }
 
     const lyricsManagerButton = elem.querySelector("#LyricsManager");
-    if (lyricsManagerButton && isTTMLMakerMode) {
+    if (lyricsManagerButton) {
       try {
         Tooltips.LyricsManager = createTooltip(lyricsManagerButton, {
           ...Spicetify.TippyProps,
@@ -779,11 +768,6 @@ $lineHoverBackground.listen((v) => {
   PageContainer.classList.toggle("NoLineHoverBackground", !v);
 });
 
-$duetLinePadding.listen((v) => {
-  if (!PageContainer) return;
-  PageContainer.classList.toggle("DuetLinePadding", v);
-});
-
 $creditsFollowLastLine.listen((v) => {
   if (!PageContainer) return;
   PageContainer.classList.toggle("CreditsFollowLastLine", v);
@@ -823,10 +807,5 @@ $viewControlsPosition.listen((v) => {
   PageContainer.classList.toggle("ViewControlsPosition_Bottom", v === "Bottom");
   AppendViewControls(true);
 });
-
-$ttmlMakerMode.listen((v) => {
-  if (!PageContainer) return;
-  AppendViewControls(true);
-})
 
 export default PageView;

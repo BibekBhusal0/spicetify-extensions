@@ -693,17 +693,9 @@
   transform: translateY(calc(var(--DefaultLyricsSize) * 0)) !important;
 } */
 
-/* DuetLinePadding (setting) — how far a duet line is inset on the side it leans away
-   from. On, the inset is wide enough that the two voices read as separate
-   columns; off, duet lines keep the same slight padding every other line gets. */
+/* How far a duet line is inset on the side it leans away from, so the two
+   voices read as separate columns. */
 #SpicyLyricsPage.SpicyRenderer
-  .LyricsContainer
-  .LyricsContent
-  .SpicyLyricsScrollContainer.HasDuetLines {
-  --DuetLineInset: 5cqw;
-}
-
-#SpicyLyricsPage.SpicyRenderer.DuetLinePadding
   .LyricsContainer
   .LyricsContent
   .SpicyLyricsScrollContainer.HasDuetLines {

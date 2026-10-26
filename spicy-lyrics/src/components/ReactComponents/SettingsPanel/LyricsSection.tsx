@@ -1,7 +1,6 @@
 import { useStore } from "@nanostores/react";
 import {
   $creditsFollowLastLine,
-  $duetLinePadding,
   $joinSplitWords,
   $lineHoverBackground,
   $minimalLyricsMode,
@@ -64,18 +63,6 @@ const groups: GroupDef[] = [
             label={label}
             checked={useStore($lineHoverBackground)}
             onChange={(v) => $lineHoverBackground.set(v)}
-          />
-        ),
-      },
-      {
-        id: "duetLinePadding",
-        label: "Duet Line Padding",
-        keywords: "indent voices",
-        Control: ({ label }) => (
-          <Toggle
-            label={label}
-            checked={useStore($duetLinePadding)}
-            onChange={(v) => $duetLinePadding.set(v)}
           />
         ),
       },

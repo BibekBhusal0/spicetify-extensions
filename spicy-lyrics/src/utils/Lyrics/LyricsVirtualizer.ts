@@ -105,10 +105,9 @@ function stepCascadeRow(row: CascadeRow, dt: number, w: number): void {
 const isRefreshedSimpleLyrics = (): boolean =>
   $simpleLyricsMode.get() && isExperimentEnabled("refreshedSimpleLyrics");
 
-// Background Vocal Pop-Out only applies to the refreshed layout. The animator
-// folds lines by the same gate, so the two agree on which rows collapse.
-export const isBgPopActive = (): boolean =>
-  isRefreshedSimpleLyrics() && isExperimentEnabled("backgroundLinePop");
+// Background Vocal Pop-Out was removed; it never applied outside the refreshed
+// layout, which is itself still experimental and off by default.
+export const isBgPopActive = (): boolean => false;
 
 class LyricsVirtualizer {
   private _virtualizer: Virtualizer<HTMLElement, HTMLElement> | null = null;
@@ -843,7 +842,6 @@ class LyricsVirtualizer {
     };
     this._maid!.Give($simpleLyricsMode.listen(syncLayout));
     this._maid!.Give($experiment("refreshedSimpleLyrics").listen(syncLayout));
-    this._maid!.Give($experiment("backgroundLinePop").listen(syncLayout));
     this._blockLayoutGlide(LAYOUT_GLIDE_BLOCK_INIT_MS);
 
     scrollEl.scrollTop = 0;

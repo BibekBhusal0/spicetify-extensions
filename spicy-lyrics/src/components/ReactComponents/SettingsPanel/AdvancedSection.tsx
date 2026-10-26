@@ -1,7 +1,6 @@
 import { useStore } from "@nanostores/react";
 import {
   RemoveCurrentLyrics_AllCaches,
-  RemoveCurrentLyrics_StateCache,
   RemoveLyricsCache,
 } from "../../../utils/LyricsCacheTools.ts";
 import { $developerMode } from "../../../utils/stores.ts";
@@ -34,20 +33,6 @@ const groups: GroupDef[] = [
         Control: () => (
           <button type="button" className="sl-sp-btn" onClick={() => RemoveLyricsCache(true)}>
             Clear
-          </button>
-        ),
-      },
-      {
-        id: "clearCurrentSongState",
-        label: "Reset This Song's Lyrics",
-        keywords: "clear current song internal state cache",
-        Control: () => (
-          <button
-            type="button"
-            className="sl-sp-btn"
-            onClick={() => RemoveCurrentLyrics_StateCache(true)}
-          >
-            Reset
           </button>
         ),
       },

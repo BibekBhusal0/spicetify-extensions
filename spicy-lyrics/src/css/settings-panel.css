@@ -310,8 +310,7 @@ sl-generic-modal.SpicyLyricsModal .sl-modal-overlay {
     text-align: right;
   }
 
-  .sl-sp-empty,
-  .sl-sp-about {
+  .sl-sp-empty {
     color: var(--spice-text);
   }
 

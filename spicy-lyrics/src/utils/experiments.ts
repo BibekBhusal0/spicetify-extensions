@@ -108,13 +108,6 @@ export const EXPERIMENTS = [
     pageClass: "Exp_ScrubPreview",
   },
   {
-    id: "backgroundLinePop",
-    label: "Background Vocal Pop-Out",
-    description: "Background vocals slide out when sung.",
-    default: false,
-    pageClass: "Exp_BackgroundLinePop",
-  },
-  {
     id: "keepOverlappingLines",
     label: "Keep Overlapping Lines",
     description: "Overlapping lines stay dimmed instead of fading.",

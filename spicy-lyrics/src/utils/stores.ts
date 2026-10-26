@@ -20,8 +20,6 @@ function saveSettingsBlob(obj: Record<string, any>) {
 function migrateSettingsKeys(blob: Record<string, any>): Record<string, any> {
   const renames: Record<string, string> = {
     "skip-spicy-font": "skipSpicyFont",
-    // Was an experiment; carry over the choice of anyone who toggled it.
-    "experiment:duetLinePadding": "duetLinePadding",
   };
   let changed = false;
   for (const [oldKey, newKey] of Object.entries(renames)) {
@@ -71,9 +69,6 @@ export const $minimalLyricsMode = persistAtom<boolean>("minimalLyricsMode", fals
 export const $joinSplitWords = persistAtom<boolean>("joinSplitWords", false);
 // Tinted box drawn behind a lyrics line while the pointer is over it.
 export const $lineHoverBackground = persistAtom<boolean>("lineHoverBackground", true);
-// Wide inset on the side a duet line leans away from, so the two voices read as
-// separate columns. Off gives duet lines the same slight padding as every line.
-export const $duetLinePadding = persistAtom<boolean>("duetLinePadding", true);
 // When a song ends on a duet line sung from the right, the credits under it
 // (writers, provider, community info) move to the right with it.
 export const $creditsFollowLastLine = persistAtom<boolean>("creditsFollowLastLine", false);
@@ -84,7 +79,6 @@ export const $showNoLyricsNotice = persistAtom<boolean>("showNoLyricsNotice", tr
 export const $removeSpotifyLyricsButton = persistAtom<boolean>("removeSpotifyLyricsButton", true);
 export const $lockedMediaBox =persistAtom<boolean>("lockedMediaBox", false);
 export const $viewControlsPosition = persistAtom<string>("viewControlsPosition", "Top");
-export const $ttmlMakerMode = persistAtom<boolean>("ttmlMakerMode", true);
 // Last upload mode picked in the Local DB upload screen: "persistent" | "temporary".
 export const $ttmlUploadMode = persistAtom<string>("ttmlUploadMode", "persistent");
 export const $developerMode = persistAtom<boolean>("developerMode", false);
