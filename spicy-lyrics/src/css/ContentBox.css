@@ -467,8 +467,17 @@
   display: flex;
   align-items: center;
   flex-direction: column;
-  opacity: var(--ControlsOpacity);
-  will-change: opacity;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+#SpicyLyricsPage.Fullscreen
+  .ContentBox
+  .NowBar
+  .Header
+  .MediaBox:hover
+  .MediaContent {
+  opacity: 1;
 }
 
 /* #SpicyLyricsPage.Fullscreen .ContentBox .NowBar .Header .MediaBox:hover .MediaContent {
