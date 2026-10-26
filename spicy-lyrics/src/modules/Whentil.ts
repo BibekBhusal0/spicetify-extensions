@@ -22,11 +22,11 @@ function Until<T>(
         if (!conditionMet) {
             callback();
             executedCount++;
-            setTimeout(runner, 0);
+            setTimeout(runner, 25);
         }
     };
 
-    setTimeout(runner, 0);
+    setTimeout(runner, 25);
 
     return {
         Cancel() {
@@ -68,12 +68,12 @@ function When<T>(
         // deno-lint-ignore no-unused-vars
         } catch (error) {
             // The thing being waited on isn't there yet — keep polling.
-            setTimeout(runner, 0);
+            setTimeout(runner, 25);
             return;
         }
 
         if (!conditionMet) {
-            setTimeout(runner, 0);
+            setTimeout(runner, 25);
             return;
         }
 
@@ -88,7 +88,7 @@ function When<T>(
         if (executionsRemaining > 0) setTimeout(runner, 0);
     };
 
-    setTimeout(runner, 0);
+    setTimeout(runner, 25);
 
     return {
         Cancel() {

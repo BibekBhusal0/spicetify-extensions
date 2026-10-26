@@ -295,7 +295,7 @@ function OpenNowBar(skipSaving: boolean = false) {
             } else {
               HeartElement.classList.remove("Filled");
             }
-          }, 50)
+          }, 500)
         );
 
         AppendQueue.push(HeartElement);

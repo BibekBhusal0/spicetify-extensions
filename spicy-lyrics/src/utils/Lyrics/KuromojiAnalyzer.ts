@@ -1,9 +1,6 @@
 // deno-lint-ignore-file no-async-promise-executor no-explicit-any
 import { RetrievePackage } from "../ImportPackage.ts";
 
-RetrievePackage("Kuromoji", "1.0.0", "js")
-  .catch(() => {});
-
 let Analyzer: any;
 export const init = (): Promise<void> => {
   if (Analyzer !== undefined) {

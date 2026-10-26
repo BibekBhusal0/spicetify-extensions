@@ -77,16 +77,29 @@ const frame = (timestamp: number) => {
   }
 };
 
+let running = false;
+
 const loop = (timestamp: number) => {
   frame(timestamp);
-  requestAnimationFrame(loop);
+  if (callbacks.size > 0 || pending.size > 0) {
+    requestAnimationFrame(loop);
+  } else {
+    running = false;
+  }
 };
 
-requestAnimationFrame(loop);
+// The loop only runs while something is subscribed, so a closed lyrics page
+// costs no frames at all.
+const ensureRunning = () => {
+  if (running) return;
+  running = true;
+  requestAnimationFrame(loop);
+};
 
 /** Run `callback` on every rendered frame. Returns a function that unsubscribes it. */
 export function onAnimationFrame(callback: FrameCallback): () => void {
   callbacks.add(callback);
+  ensureRunning();
   return () => callbacks.delete(callback);
 }
 
@@ -97,6 +110,7 @@ export function onAnimationFrame(callback: FrameCallback): () => void {
 export function requestCappedFrame(callback: FrameCallback): number {
   const id = nextPendingId++;
   pending.set(id, callback);
+  ensureRunning();
   return id;
 }
 

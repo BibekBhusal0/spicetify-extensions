@@ -8,9 +8,11 @@ import { PageContainer } from "../../components/Pages/PageView.ts";
 import Logger from "../Logger.ts";
 import { StripEmptyLyricsLines } from "./EmptyLines.ts";
 
-// Constants
 const RomajiConverter = new Kuroshiro();
-const RomajiPromise = RomajiConverter.init(KuromojiAnalyzer);
+// The Kuromoji bundle plus its dictionary is a large download, so conversion is
+// only initialised once a Japanese payload actually shows up.
+let RomajiPromise: Promise<void> | null = null;
+const ensureRomaji = () => (RomajiPromise ??= RomajiConverter.init(KuromojiAnalyzer));
 
 const romanizationLogger = new Logger("Lyrics Romanization");
 
@@ -38,16 +40,6 @@ const ItemGreekTest = GreekTextTest;
 // Any original (non-Latin) romanizable script — used in dev to flag residue.
 const ResidualScriptTest =
   /[぀-ヿ一-鿿가-힯ᄀ-ᇿ㄰-㆏Ѐ-ԯͰ-Ͽἀ-῿]/;
-
-// Load Packages
-RetrievePackage("pinyin", "4.0.0", "mjs")
-  .catch(() => {});
-
-RetrievePackage("aromanize", "1.0.0", "js")
-  .catch(() => {});
-
-RetrievePackage("GreekRomanization", "1.0.0", "js")
-  .catch(() => {});
 
 type RomanizationBranch = "Japanese" | "Chinese" | "Korean" | "Cyrillic" | "Greek";
 
@@ -99,7 +91,7 @@ const loadPackagesForScripts = async (
   const packages: RomanizationPackages = {};
   for (const script of scripts) {
     if (script === "Japanese") {
-      await RomajiPromise;
+      await ensureRomaji();
     } else if (script === "Chinese") {
       packages.pinyin = await RetrievePackage("pinyin", "4.0.0", "mjs");
     } else if (script === "Korean") {
@@ -115,7 +107,7 @@ const loadPackagesForScripts = async (
 // through unchanged so they can be composed for mixed-script text. ---
 
 const romanizeJapaneseText = async (text: string): Promise<string> => {
-  await RomajiPromise;
+  await ensureRomaji();
   return await RomajiConverter.convert(text, { to: "romaji", mode: "spaced" });
 };
 

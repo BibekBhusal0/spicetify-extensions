@@ -1,4 +1,4 @@
-import { $playbackOffset } from "../stores.ts";
+import { $lyricsContainerExists, $playbackOffset } from "../stores.ts";
 import { SpotifyPlayer } from "./../../components/Global/SpotifyPlayer.ts";
 
 interface SyncedPosition {
@@ -354,11 +354,18 @@ export const requestPositionSync = () => {
         console.error("Sync Position: Poll failed, More Details:", error);
       })
       .then(() => {
-        const delay = isLocallyPlaying
-          ? 1 / 60
-          : canSyncNonLocalTimestamp === 0
+        // 60 Hz only while something is drawn from it: a paused track only
+        // moves on seek, and a closed page has nothing animating. Both resume
+        // the fast cadence on the next tick after waking up.
+        const pageIsLive =
+          $lyricsContainerExists.get() && Spicetify.Player.isPlaying();
+        const delay = !pageIsLive
+          ? 0.25
+          : isLocallyPlaying
             ? 1 / 60
-            : syncTimings[syncTimings.length - canSyncNonLocalTimestamp];
+            : canSyncNonLocalTimestamp === 0
+              ? 1 / 60
+              : syncTimings[syncTimings.length - canSyncNonLocalTimestamp];
 
         setTimeout(requestPositionSync, delay * 1000);
       });

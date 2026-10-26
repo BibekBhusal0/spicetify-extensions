@@ -279,6 +279,18 @@ export function ScrollToActiveLine(ScrollSimplebar: any) {
 
   //if (Spicetify.Platform.History.location.pathname === "/SpicyLyrics") {
   const Position = SpotifyPlayer.GetPosition();
+  // Line statuses only move with the clock, and every path that needs a scroll
+  // without a position change goes through one of these flags. A thumb drag is
+  // the exception: its blur handling runs per tick.
+  if (
+    Position === lastPosition &&
+    lastLine !== null &&
+    !isForceScrollQueued &&
+    !isSmoothForceScrollQueued &&
+    !IsScrollbarDragging()
+  ) {
+    return;
+  }
   // Early scroll: pick the scroll target as if the clock were this far ahead, so
   // the list starts moving before the line lights up instead of snapping to it
   // the moment it does. Only the target changes — line states (Status) still

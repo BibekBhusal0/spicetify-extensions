@@ -446,7 +446,6 @@ Global.Event.listen("lyrics:apply", ({ Type }: { Type: string }) => {
     LyricsApplied = true;
   }
 
-  setTimeout(() => triggerRemeasureLV(), 1000);
   setTimeout(() => triggerRemeasureLV(), 1500);
 });
 

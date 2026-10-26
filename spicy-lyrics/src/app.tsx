@@ -529,11 +529,16 @@ async function main() {
       fetchLyrics(Spicetify.Player.data?.item?.uri).then(ApplyLyrics);
     });
 
-    new IntervalManager(ScrollingIntervalTime, () => {
+    // Frame-accurate only while the page is up; an idle page costs no frames.
+    const scrollToActiveLineLoop = new IntervalManager(ScrollingIntervalTime, () => {
       if (ScrollSimplebar) {
         ScrollToActiveLine(ScrollSimplebar);
       }
-    }).Start();
+    });
+    $lyricsContainerExists.listen((exists) => {
+      if (exists && !scrollToActiveLineLoop.Running) scrollToActiveLineLoop.Start();
+      else if (!exists && scrollToActiveLineLoop.Running) scrollToActiveLineLoop.Stop();
+    });
 
     interface Location {
       pathname: string;
@@ -651,7 +656,8 @@ async function main() {
       // These interval managers are intentionally not stored in variables that are used elsewhere
       // They are self-running background processes that continue to run throughout the app lifecycle
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      new IntervalManager(Infinity, () => {
+      // Repeat state has no event and never changes within a second.
+      new IntervalManager(1, () => {
         const LoopState = Spicetify.Player.getRepeat();
         const LoopType: LoopType = LoopState === 1 ? "context" : LoopState === 2 ? "track" : "none";
         SpotifyPlayer.LoopType = LoopType;
@@ -666,7 +672,8 @@ async function main() {
       type ShuffleType = "smart" | "normal" | "none";
       let lastShuffleType: ShuffleType | null = null;
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      new IntervalManager(Infinity, () => {
+      // Shuffle state has no event either; same one-second cadence as repeat.
+      new IntervalManager(1, () => {
         const ShuffleType: ShuffleType = (Spicetify.Player as any).origin._state.smartShuffle
           ? "smart"
           : (Spicetify.Player as any).origin._state.shuffle

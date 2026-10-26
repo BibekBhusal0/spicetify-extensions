@@ -85,8 +85,10 @@ export function watchMarketplaceUserCss(): () => void {
     }
   };
 
+  // The target is a direct child of body, so subtree watching only adds
+  // records for the rest of the app's DOM churn.
   const bodyObserver = new MutationObserver(sync);
-  bodyObserver.observe(document.body, { childList: true, subtree: true });
+  bodyObserver.observe(document.body, { childList: true });
 
   // Initial sync (handles already-present element)
   sync();

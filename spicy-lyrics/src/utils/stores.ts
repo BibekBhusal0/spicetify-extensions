@@ -53,9 +53,13 @@ const _settings: Record<string, any> = migrateSettingsKeys(readSettingsBlob());
  */
 export function persistAtom<T>(key: string, defaultValue: T) {
   const store = atom<T>(_settings[key] !== undefined ? _settings[key] : defaultValue);
+  let saveTimer: ReturnType<typeof setTimeout> | undefined;
   store.listen((v) => {
     _settings[key] = v;
-    saveSettingsBlob(_settings);
+    // Writes go through Spotify's JSON-encoded storage; a slider dragging
+    // through values would otherwise write on every step.
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => saveSettingsBlob(_settings), 250);
   });
   return store;
 }

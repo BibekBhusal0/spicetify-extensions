@@ -223,7 +223,16 @@ const LyricsInterval = () => {
   }
 };
 
-onAnimationFrame(LyricsInterval);
+// Only while the page is up: an off-screen page has nothing to animate.
+let stopLyricsInterval: (() => void) | null = null;
+$lyricsContainerExists.listen((exists) => {
+  if (exists && !stopLyricsInterval) {
+    stopLyricsInterval = onAnimationFrame(LyricsInterval);
+  } else if (!exists && stopLyricsInterval) {
+    stopLyricsInterval();
+    stopLyricsInterval = null;
+  }
+});
 
 // Define proper types for event listener variables
 let LinesEvListenerMaid: Maid | null = null;
