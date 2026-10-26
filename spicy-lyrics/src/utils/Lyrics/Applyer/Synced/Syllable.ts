@@ -1,7 +1,6 @@
 import {
   $joinSplitWords,
   $lyricsContainerExists,
-  $minimalLyricsMode,
   $simpleLyricsMode,
 } from "../../../../utils/stores.ts";
 import { PageContainer } from "../../../../components/Pages/PageView.ts";
@@ -221,20 +220,7 @@ export function ApplySyllableLyrics(data: LyricsData, UseRomanized: boolean = fa
     const lineElem = document.createElement("div");
     lineElem.classList.add("line");
 
-    const nextLineStartTime = arr[index + 1]?.Lead.StartTime ?? 0;
-
-    const lineEndTimeAndNextLineStartTimeDistance =
-      nextLineStartTime !== 0 ? nextLineStartTime - line.Lead.EndTime : 0;
-
-    const lineEndTime =
-      $minimalLyricsMode.get()
-        ? nextLineStartTime === 0
-          ? line.Lead.EndTime
-          : lineEndTimeAndNextLineStartTimeDistance < getLyricsBetweenShow() &&
-              nextLineStartTime > line.Lead.EndTime
-            ? nextLineStartTime
-            : line.Lead.EndTime
-        : line.Lead.EndTime;
+    const lineEndTime = line.Lead.EndTime;
 
     LyricsObject.Types.Syllable.Lines.push({
       HTMLElement: lineElem,

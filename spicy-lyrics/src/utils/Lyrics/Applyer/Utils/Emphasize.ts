@@ -3,19 +3,11 @@ import { ArabicPersianRegex } from "../../../Addons.ts";
 import { IdleEmphasisLyricsScale } from "../../Animator/Shared.ts";
 import { ConvertTime } from "../../ConvertTime.ts";
 import { CurrentLineLyricsObject, LyricsObject } from "../../lyrics.ts";
-import { isExperimentEnabled } from "../../../experiments.ts";
 
 const Substractions = {
   StartTime: $simpleLyricsMode.get() ? -21 : 0,
   EndTime: $simpleLyricsMode.get() ? -40 : 250,
 };
-
-// Refreshed Simple Lyrics: how much sooner an emphasized word's letters finish
-// than the word is sung, in ms. This is the emphasis' total length: shortening
-// it brings the whole fill and lift forward. A word is never cut below
-// RefreshedEmphasisMinShare of its length, so short words keep their emphasis.
-export const RefreshedEmphasisTrimMs = 0;
-export const RefreshedEmphasisMinShare = 0.5;
 
 interface LetterData {
   HTMLElement: HTMLElement;
@@ -33,12 +25,7 @@ export default function Emphasize(
   isBgWord: boolean = false
 ) {
   const StartTime = ConvertTime(lead.StartTime) - Substractions.StartTime;
-  let EndTime = ConvertTime(lead.EndTime) - Substractions.EndTime;
-  const refreshed = $simpleLyricsMode.get() && isExperimentEnabled("refreshedSimpleLyrics");
-  if (refreshed) {
-    const sung = EndTime - StartTime;
-    EndTime = StartTime + Math.max(sung - RefreshedEmphasisTrimMs, sung * RefreshedEmphasisMinShare);
-  }
+  const EndTime = ConvertTime(lead.EndTime) - Substractions.EndTime;
   const totalDuration = EndTime - StartTime;
   const letterDuration = totalDuration / letters.length; // Duration per letter
   const word = applyTo;
@@ -90,12 +77,8 @@ export default function Emphasize(
     }
     letterElem.style.setProperty("--text-shadow-opacity", `0%`);
     letterElem.style.setProperty("--text-shadow-blur-radius", `4px`);
-    // Refreshed letters rest level and at full size. Starting them at the old
-    // idle pose made them snap up in one frame when their line went active.
-    if (!refreshed) {
-      letterElem.style.scale = IdleEmphasisLyricsScale.toString();
-      letterElem.style.transform = `translateY(calc(var(--DefaultLyricsSize) * 0.02))`;
-    }
+    letterElem.style.scale = IdleEmphasisLyricsScale.toString();
+    letterElem.style.transform = `translateY(calc(var(--DefaultLyricsSize) * 0.02))`;
 
     word.appendChild(letterElem);
   });

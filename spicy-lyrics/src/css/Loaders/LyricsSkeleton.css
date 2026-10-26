@@ -1,11 +1,11 @@
-/* Loading placeholder shown while lyrics fetch and render (experiment
-   `lyricsSkeleton`). Every animation here is transform or opacity only: those
+/* Loading placeholder shown while lyrics fetch and render. Every animation here
+   is transform or opacity only: those
    run on the compositor and keep moving while the main thread is busy building
    the lyrics DOM, which is the whole point of the placeholder. The keyframes
    (SL_SkeletonSweep, SL_SkeletonDot) live in app.tsx's injected style block. */
 
-#SpicyLyricsPage:not(.Exp_LyricsSkeleton) .LyricsContainer .LyricsSkeleton,
-#SpicyLyricsPage.Exp_LyricsSkeleton .LyricsContainer .loaderContainer {
+#SpicyLyricsPage:not(.ShowLyricsSkeleton) .LyricsContainer .LyricsSkeleton,
+#SpicyLyricsPage.ShowLyricsSkeleton .LyricsContainer .loaderContainer {
   display: none;
 }
 
@@ -15,8 +15,7 @@
   position: absolute;
   inset: 0;
   /* Same box as .LyricsContent, which is also a size container: the lines'
-     cqh/cqw offsets resolve against it, not the page. They differ whenever the
-     LyricsContainer is shorter than the page (compact mode). */
+     cqh/cqw offsets resolve against it, not the page. */
   container-type: size;
   z-index: 10;
   pointer-events: none;
@@ -30,8 +29,8 @@
     display 0s linear 0.25s allow-discrete;
 }
 
-/* .Exp_LyricsSkeleton keeps this from beating the experiment-off display: none. */
-#SpicyLyricsPage.Exp_LyricsSkeleton .LyricsContainer .LyricsSkeleton.active {
+/* .ShowLyricsSkeleton keeps this from beating the setting-off display: none. */
+#SpicyLyricsPage.ShowLyricsSkeleton .LyricsContainer .LyricsSkeleton.active {
   display: block;
   opacity: 1;
   visibility: visible;
@@ -42,7 +41,7 @@
 }
 
 @starting-style {
-  #SpicyLyricsPage.Exp_LyricsSkeleton .LyricsContainer .LyricsSkeleton.active {
+  #SpicyLyricsPage.ShowLyricsSkeleton .LyricsContainer .LyricsSkeleton.active {
     opacity: 0;
   }
 }

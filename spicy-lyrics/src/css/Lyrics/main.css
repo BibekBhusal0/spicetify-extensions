@@ -20,12 +20,7 @@
 }
 
 #SpicyLyricsPage .LyricsContainer .LyricsContent {
-  --TextGlowDef: rgba(255, 255, 255, 0.15) 0px 0px 6px;
-  --ActiveTextGlowDef: rgba(255, 255, 255, 0.4) 0px 0px 14px;
-  --StrongTextGlowDef: rgba(255, 255, 255, 0.68) 0px 0px 16.4px;
-  --StrongerTextGlowDef: rgba(255, 255, 255, 0.74) 0px 0px 16px;
   --DefaultLyricsSize: clamp(1.85rem, calc(1cqw * 7), 3.5rem);
-  --amll-lyric-player-font-size: var(--DefaultLyricsSize);
   --Simplebar-Scrollbar-Color: rgba(255, 255, 255, 0.6);
   --vertical-gap: 0px;
 
@@ -71,10 +66,6 @@
   font-weight: 700 !important;
 }
 
-/* #SpicyLyricsPage.Fullscreen.MinimalLyricsMode .LyricsContainer .LyricsContent {
-  --vertical-gap: 14cqh;
-} */
-
 #SpicyLyricsPage .LyricsContainer .LyricsContent.HiddenTransitioned {
   opacity: 0;
 }
@@ -115,28 +106,6 @@ body:has(.Root:not(.global-nav)) #SpicyLyricsPage .LyricsContainer .LyricsConten
   margin: 0 !important;
 }
 
-#SpicyLyricsPage.Fullscreen.MinimalLyricsMode
-  .LyricsContainer
-  .LyricsContent
-  .SpicyLyricsScrollContainer {
-  margin-top: 40cqh;
-}
-
-/* The loading skeleton mirrors the lines' offset (LyricsSkeleton.css). */
-#SpicyLyricsPage.Fullscreen.MinimalLyricsMode
-  .LyricsContainer
-  .LyricsSkeleton
-  .SkeletonLines {
-  padding-top: 40cqh;
-}
-
-body:has(.Root:not(.global-nav)) #SpicyLyricsPage.Fullscreen.MinimalLyricsMode
-  .LyricsContainer
-  .LyricsContent
-  .SpicyLyricsScrollContainer {
-  margin-top: 0cqh;
-  padding-top: 40cqh;
-}
 /* 
 #SpicyLyricsPage .LyricsContainer .LyricsContent .BottomSpacer {
   display: block;

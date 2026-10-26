@@ -17,14 +17,7 @@ export interface SettingDef {
    * Called inside the row's own component, so it may use hooks.
    */
   useDisabled?: () => string | false;
-  /**
-   * Returns a note shown under the row without disabling it, for when another
-   * setting keeps this one from taking effect, or false. May use hooks, like `useDisabled`.
-   */
-  useNote?: () => string | false;
   Control?: React.FC<{ disabled: boolean; label: string }>;
-  /** Renders the whole row instead of `Control` (experiments bring their own badge). */
-  render?: (label: React.ReactNode) => React.ReactNode;
 }
 
 export interface GroupDef {
@@ -38,7 +31,6 @@ export type SectionId =
   | "playback"
   | "interface"
   | "appearance"
-  | "experiments"
   | "advanced";
 
 export interface SectionDef {
@@ -49,7 +41,7 @@ export interface SectionDef {
   secondary?: boolean;
   /** Short line under the pane title. */
   intro?: string;
-  /** Called on every render, so dynamic lists (experiments) stay current. */
+  /** Called on every render. */
   groups?: () => GroupDef[];
   /** Shown when `groups` comes back empty. */
   emptyText?: string;

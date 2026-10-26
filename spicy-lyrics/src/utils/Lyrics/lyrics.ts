@@ -1,4 +1,4 @@
-import { $lyricsContainerExists, $minimalLyricsMode, $seekFadeCompensation } from "../stores.ts";
+import { $lyricsContainerExists, $seekFadeCompensation } from "../stores.ts";
 import { $romanization } from "../uiState.ts";
 import Global from "../../components/Global/Global.ts";
 import { SpotifyPlayer } from "../../components/Global/SpotifyPlayer.ts";
@@ -9,7 +9,7 @@ import { onAnimationFrame } from "../AnimationFrameLoop.ts";
 
 export const ScrollingIntervalTime = Infinity;
 
-export const getLyricsBetweenShow = () => ($minimalLyricsMode.get() ? 5 : 3);
+export const getLyricsBetweenShow = () => 3;
 
 export const SimpleLyricsMode_LetterEffectsStrengthConfig = {
   LongerThan: 1500,

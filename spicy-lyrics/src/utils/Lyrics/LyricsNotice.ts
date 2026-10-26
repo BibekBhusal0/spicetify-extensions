@@ -1,12 +1,9 @@
 import Session from "../../components/Global/Session.ts";
 import { SpotifyPlayer } from "../../components/Global/SpotifyPlayer.ts";
 import { PageContainer } from "../../components/Pages/PageView.ts";
-import { IsCompactMode } from "../../components/Utils/CompactMode.ts";
 import Fullscreen from "../../components/Utils/Fullscreen.ts";
 import { SyncNowBarSide } from "../../components/Utils/NowBar.ts";
 import { IsOpen as IsBreakerOpen, RetryAfterMs } from "../API/CircuitBreaker.ts";
-import { getExperiments, isExperimentEnabled } from "../experiments.ts";
-import { $showNoLyricsNotice } from "../stores.ts";
 import { GetLastLyricsFailure } from "./fetchLyrics.ts";
 
 const DISCORD_URL = "https://discord.com/invite/uqgXU5wh8j";
@@ -89,19 +86,6 @@ export function HasNotice(descriptor: string): boolean {
   return Object.hasOwn(NOTICES, descriptor);
 }
 
-/**
- * The notices that only say the song has no lyrics, with nothing to retry.
- * Turning off `$showNoLyricsNotice` hides these; errors keep theirs.
- */
-const NO_LYRICS_NOTICES = new Set([
-  "lyrics-not-found",
-  "local-track",
-  "dj",
-  "video-track",
-  "episode-track",
-  "mixed-track",
-]);
-
 // The notice the lyrics area holds, or null while it holds lyrics (or a loader).
 let shownNotice: string | null = null;
 
@@ -111,20 +95,16 @@ export function SetShownNotice(descriptor: string | null): void {
 
 function shouldHideLyricsArea(): boolean {
   if (!shownNotice || !PageContainer) return false;
-  if (!$showNoLyricsNotice.get() && NO_LYRICS_NOTICES.has(shownNotice)) return true;
-  // Fullscreen and Cinema View show the song on its own instead of the notice.
-  // Compact mode keeps the notice because the song info is already beside it.
+  // Fullscreen shows the song on its own instead of the notice.
   return (
     (shownNotice === "lyrics-not-found" || shownNotice === "local-track") &&
-    !IsCompactMode() &&
-    (Fullscreen.IsOpen || Fullscreen.CinemaViewOpen)
+    Fullscreen.IsOpen
   );
 }
 
 /**
  * Hides or reveals the lyrics area for the notice it holds. The single place that
- * decides it: call after anything that changes the notice, compact mode, fullscreen
- * or the setting.
+ * decides it: call after anything that changes the notice or fullscreen.
  */
 export function SyncNoLyricsLayout(): void {
   const page = PageContainer;
@@ -135,30 +115,14 @@ export function SyncNoLyricsLayout(): void {
   SyncNowBarSide();
 }
 
-$showNoLyricsNotice.listen(() => queueMicrotask(SyncNoLyricsLayout));
-
 function describeView(): string {
   const parts: string[] = [];
-  if (Fullscreen.CinemaViewOpen) parts.push("Cinema");
-  else if (Fullscreen.IsOpen) parts.push("Fullscreen");
-  else parts.push("Page");
-  if (IsCompactMode()) parts.push("compact");
+  parts.push(Fullscreen.IsOpen ? "Fullscreen" : "Page");
   const page = PageContainer?.classList;
   if (page?.contains("NowBarStatus__Open")) {
     parts.push(page.contains("NowBarSide__Right") ? "Now Bar right" : "Now Bar left");
   }
   return parts.join(", ");
-}
-
-function changedExperiments(): string {
-  const changed = getExperiments()
-    .filter((exp) => isExperimentEnabled(exp.id) !== exp.default)
-    .map(
-      (exp) =>
-        `${exp.id} ${isExperimentEnabled(exp.id) ? "on" : "off"}` +
-        (exp.forceState === undefined ? "" : " (forced)")
-    );
-  return changed.length ? changed.join(", ") : "defaults";
 }
 
 /**
@@ -182,7 +146,6 @@ export function BuildNoticeReport(descriptor: string, status: number, uri: strin
     ["Theme", Spicetify.Config?.current_theme],
     ["OS", Spicetify.Platform?.operatingSystem ?? navigator.platform],
     ["View", describeView()],
-    ["Experiments", changedExperiments()],
     ["Online", navigator.onLine ? "yes" : "no"],
     ["Service", IsBreakerOpen() ? `paused, retry in ${Math.ceil(RetryAfterMs() / 1000)}s` : "ok"],
     ["Time", new Date().toISOString().replace("T", " ").replace(/\.\d+Z$/, " UTC")],

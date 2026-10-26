@@ -8,7 +8,6 @@ import {
 import Global from "../../components/Global/Global.ts";
 import { SpotifyPlayer } from "../../components/Global/SpotifyPlayer.ts";
 import { PageContainer } from "../../components/Pages/PageView.ts";
-import { IsCompactMode } from "../../components/Utils/CompactMode.ts";
 import {
   type LyricsLine,
   LyricsObject,
@@ -16,10 +15,8 @@ import {
   type LyricsType,
 } from "../Lyrics/lyrics.ts";
 import { ScrollIntoCenterViewCSS } from "../ScrollIntoView/Center.ts";
-import { ScrollIntoTopViewCSS } from "../ScrollIntoView/Top.ts";
 import {
   getLyricsVirtualizer,
-  lyricsUseRefreshedLayout,
   scrollLyricsToIndex,
 } from "../Lyrics/LyricsVirtualizer.ts";
 import { IsScrollbarDragging } from "./Simplebar/ScrollSimplebar.ts";
@@ -215,28 +212,20 @@ const GetScrollLine = (Lines: LyricsLine[] | LyricsSyllable[], ProcessedPosition
   return enhance(lastIdx - firstIdx <= 1 ? firstIdx : lastIdx);
 };
 
-// Keep the active line clear of the top mask in "Top" scrolling.
-const GetTopScrollOffset = () => 85;
-
 const ScrollTo = (
   container: HTMLElement,
   element: HTMLElement,
   instantScroll: boolean = false,
-  type: "Center" | "Top" = "Center",
   lineIndex?: number
 ) => {
   if (lineIndex !== undefined && getLyricsVirtualizer()) {
     // instantScroll is effectively always true in the virtualizer path
     // (we set scrollTop directly), but passing the flag keeps the intent
     // explicit and allows a future smooth-scroll path if needed.
-    scrollLyricsToIndex(lineIndex, type === "Top" ? "start" : "center", instantScroll, type ==="Top" ? -GetTopScrollOffset(container) : 30);
+    scrollLyricsToIndex(lineIndex, "center", instantScroll, 30);
     return;
   }
-  if (type === "Center") {
-    ScrollIntoCenterViewCSS(container, element, -30, instantScroll);
-  } else if (type === "Top") {
-    ScrollIntoTopViewCSS(container, element, GetTopScrollOffset(container), instantScroll);
-  }
+  ScrollIntoCenterViewCSS(container, element, -30, instantScroll);
 };
 
 let scrolledToLastLine = false;
@@ -248,10 +237,6 @@ let lastViewportCheckTime = 0;
 let lastViewportLine: HTMLElement | null = null;
 let lastViewportContainer: HTMLElement | null = null;
 let lastIsLineInViewport = false;
-
-const GetScrollType = (): "Center" | "Top" => {
-  return IsCompactMode() ? "Top" : "Center";
-};
 
 const policyEventPreset = "policy:";
 
@@ -332,7 +317,6 @@ export function ScrollToActiveLine(ScrollSimplebar: any) {
       container,
       scrollToLine,
       shouldForceScroll || (lastPosition !== 0 && wasDrasticPositionChange(lastPosition ?? 0, Position)),
-      GetScrollType(),
       forceScrollLineIndex
     );
     if (forceScrollQueued) {
@@ -359,7 +343,7 @@ export function ScrollToActiveLine(ScrollSimplebar: any) {
     if (!scrollToLine) return;
     lastLine = scrollToLine;
     const smoothScrollLineIndex = allLinesSung ? Lines.length - 1 : currentLine?._LineIndex;
-    ScrollTo(container, scrollToLine, false, GetScrollType(), smoothScrollLineIndex);
+    ScrollTo(container, scrollToLine, false, smoothScrollLineIndex);
     if (smoothForceScrollQueued) {
       smoothForceScrollQueued = false; // Reset the queue after using it
     }
@@ -541,17 +525,15 @@ export function ScrollToActiveLine(ScrollSimplebar: any) {
         if (!isSameLine) {
           lastLine = LineElem;
           const Scroll = () => {
-            ScrollTo(container, LineElem, false, GetScrollType(), currentLine._LineIndex);
+            ScrollTo(container, LineElem, false, currentLine._LineIndex);
             scrolledToLastLine = false;
             scrolledToFirstLine = false;
           };
           // Leaving a "•••" interlude: normally wait for it to collapse first.
-          // With Smooth Scrolling (or Refreshed Simple Lyrics) the rows glide as
-          // it collapses, so scrolling at the same moment makes the two read as
-          // one motion instead of two.
+          // With Smooth Scrolling the rows glide as it collapses, so scrolling
+          // at the same moment makes the two read as one motion instead of two.
           if (
             !$smoothScrolling.get() &&
-            !lyricsUseRefreshedLayout() &&
             Lines[currentLine._LineIndex - 1] &&
             Lines[currentLine._LineIndex - 1].DotLine === true
           ) {

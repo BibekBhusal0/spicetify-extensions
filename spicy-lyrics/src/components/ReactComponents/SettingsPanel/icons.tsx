@@ -57,37 +57,10 @@ export const AppearanceIcon = (
   </Icon>
 );
 
-export const ExperimentsIcon = (
-  <Icon>
-    <path d="M6.25 2h3.5M6.75 2v4.25L3 12.25A1.25 1.25 0 0 0 4.1 14h7.8a1.25 1.25 0 0 0 1.1-1.75L9.25 6.25V2" />
-    <path d="M4.75 10h6.5" />
-  </Icon>
-);
-
 export const AdvancedIcon = (
   <Icon>
     <path d="M3 4.5l3 3.5-3 3.5M8 11.5h5" />
   </Icon>
-);
-
-export const AboutIcon = (
-  <Icon>
-    <circle cx="8" cy="8" r="5.75" />
-    <path d="M8 7.25v3.5" />
-    <circle cx="8" cy="5" r="0.4" fill="currentColor" />
-  </Icon>
-);
-
-export const PeekIcon = (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <path
-      d="M1.5 8s2.4-4.75 6.5-4.75S14.5 8 14.5 8 12.1 12.75 8 12.75 1.5 8 1.5 8z"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinejoin="round"
-    />
-    <circle cx="8" cy="8" r="2.1" stroke="currentColor" strokeWidth="1.4" />
-  </svg>
 );
 
 export const CloseIcon = (

@@ -41,14 +41,10 @@ export const Icons = {
   Fullscreen: Line(
     `<path class="SL_IconPart SL_NudgeTL" d="M3.5 8.5V6A2.5 2.5 0 0 1 6 3.5h2.5"/><path class="SL_IconPart SL_NudgeTR" d="M15.5 3.5H18A2.5 2.5 0 0 1 20.5 6v2.5"/><path class="SL_IconPart SL_NudgeBR" d="M20.5 15.5V18a2.5 2.5 0 0 1-2.5 2.5h-2.5"/><path class="SL_IconPart SL_NudgeBL" d="M8.5 20.5H6A2.5 2.5 0 0 1 3.5 18v-2.5"/>`
   ),
-  // Fullscreen turned inside out: the way back to Cinema View from fullscreen. Each corner
+  // Fullscreen turned inside out: the way back out of fullscreen. Each corner
   // leans toward the centre on hover, so it carries the opposite nudge to its position.
   CloseFullscreen: Line(
     `<path class="SL_IconPart SL_NudgeBR" d="M8.5 3.5V6A2.5 2.5 0 0 1 6 8.5H3.5"/><path class="SL_IconPart SL_NudgeBL" d="M20.5 8.5H18A2.5 2.5 0 0 1 15.5 6V3.5"/><path class="SL_IconPart SL_NudgeTL" d="M15.5 20.5V18a2.5 2.5 0 0 1 2.5-2.5h2.5"/><path class="SL_IconPart SL_NudgeTR" d="M3.5 15.5H6A2.5 2.5 0 0 1 8.5 18v2.5"/>`
-  ),
-  // The Spotify window, with the lyrics growing to its edges.
-  CinemaView: Line(
-    `${Frame}<path class="SL_IconPart SL_NudgeTL" d="M10.5 10.5 7 7m0 3V7h3"/><path class="SL_IconPart SL_NudgeBR" d="M13.5 13.5 17 17m0-3v3h-3"/>`
   ),
   PrevTrack: TrackSkip.replace("REPLACEME", "PrevTrack"),
   Play: `
@@ -132,14 +128,6 @@ export const Icons = {
   ),
   EnableRomanization: Line(
     `<path d="M2.5 18 6.75 6 11 18"/><path d="M4 14h5.5"/><g opacity=".4"><path d="M13.5 6.5h8L19 9.75"/><path d="M17.25 9.75v1.75c0 2.75-1.25 5-3.75 6.5"/></g>`
-  ),
-  // Compact layout: small cover and title on one row, lyrics underneath.
-  EnableCompactModeIcon: Line(
-    `<rect x="3.5" y="4.5" width="6" height="6" rx="1.5"/><path d="M13 5.75h7.5"/><path d="M13 9.25h4.5"/><path d="M3.5 15h17"/><path d="M3.5 19.5h11"/>`
-  ),
-  // Regular layout: large cover with its title, lyrics beside it.
-  DisableCompactModeIcon: Line(
-    `<rect x="3" y="5" width="9" height="9" rx="2"/><path d="M4.5 18.5h6"/><path d="M15.5 7.5h5"/><path d="M15.5 11.5h5"/><path d="M15.5 15.5h3"/>`
   ),
   // Eight teeth, so the 45° hover turn in default.css lands on an identical gear.
   Settings: Line(

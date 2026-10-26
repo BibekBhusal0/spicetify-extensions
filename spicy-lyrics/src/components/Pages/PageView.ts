@@ -2,7 +2,6 @@ import { createTooltip } from "../../utils/tooltip.ts";
 import fetchLyrics, { ShowQueueLoader } from "../../utils/Lyrics/fetchLyrics.ts";
 import { LyricsQueueRetry } from "../../utils/Lyrics/LyricsQueueRetry.ts";
 import { SkeletonMarkup } from "../../utils/Lyrics/LyricsSkeleton.ts";
-import { $forceCompactMode } from "../../utils/uiState.ts";
 import "../../css/Loaders/DotLoader.css";
 import { DestroyAllLyricsContainers } from "../../utils/Lyrics/Applyer/CreateLyricsContainer.ts";
 import ApplyLyrics, {
@@ -25,38 +24,24 @@ import {
 } from "../../utils/Scrolling/Simplebar/ScrollSimplebar.ts";
 import ApplyStaticBackground from "../Styling/StaticBackground.ts";
 import {
-  $creditsFollowLastLine,
   $currentLyricsData,
   $joinSplitWords,
-  $lineHoverBackground,
   $lyricsContainerExists,
-  $minimalLyricsMode,
-  $showVolumeSlider,
+  $lyricsSkeleton,
   $simpleLyricsMode,
   $skipSpicyFont,
-  $viewControlsPosition,
 } from "../../utils/stores.ts";
 import Global from "../Global/Global.ts";
 import Session from "../Global/Session.ts";
 import { SpotifyPlayer } from "../Global/SpotifyPlayer.ts";
 import { Icons } from "../Styling/Icons.ts";
-import {
-  DisableCompactMode,
-  EnableCompactMode,
-  IsCompactMode,
-} from "../Utils/CompactMode.ts";
-import Fullscreen, {
-  EnterSpicyLyricsFullscreen,
-  ExitFullscreenElement,
-  IsFullscreenClosing,
-} from "../Utils/Fullscreen.ts";
+import Fullscreen, { IsFullscreenClosing } from "../Utils/Fullscreen.ts";
 import {
   NowBarObj,
   NowBar_SwapSides,
   Session_NowBar_SetSide,
   Session_OpenNowBar,
   ToggleNowBar,
-  OpenNowBar,
 } from "../Utils/NowBar.ts";
 import TransferElement from "../Utils/TransferElement.ts";
 import { CleanUpIsByCommunity } from "../../utils/Lyrics/Applyer/Credits/ApplyIsByCommunity.tsx";
@@ -64,11 +49,6 @@ import { OpenLyricsDBPanel } from "../../utils/openLyricsDBPanel.tsx";
 import { openSettingsPanel } from "../../utils/settings.ts";
 import Logger from "../../utils/Logger.ts";
 import { setStockPlaybarPage } from "../../utils/themeMatcher.ts";
-import {
-  ApplyExperimentClasses,
-  onExperimentChange,
-  onExperimentDefinitionChange,
-} from "../../utils/experiments.ts";
 import { triggerRemeasureLV } from "../../utils/Lyrics/LyricsVirtualizer.ts";
 
 const pageLogger = new Logger("Page View");
@@ -81,21 +61,17 @@ interface TippyInstance {
 
 export const Tooltips: {
   Close: TippyInstance | null;
-  CompactModeToggle: TippyInstance | null;
   RomanizationToggle: TippyInstance | null;
   NowBarToggle: TippyInstance | null;
   FullscreenToggle: TippyInstance | null;
-  CinemaView: TippyInstance | null;
   NowBarSideToggle: TippyInstance | null;
   LyricsManager: TippyInstance | null;
   Settings: TippyInstance | null;
 } = {
   Close: null,
-  CompactModeToggle: null,
   RomanizationToggle: null,
   NowBarToggle: null,
   FullscreenToggle: null,
-  CinemaView: null,
   NowBarSideToggle: null,
   LyricsManager: null,
   Settings: null,
@@ -134,7 +110,6 @@ function cancelPendingPageMount() {
   PageMountObserver = null;
 }
 
-let PageResizeListener: ResizeObserver | null = null;
 export let PageContainer: HTMLElement | null = null;
 async function OpenPage(AppendTo: HTMLElement | undefined = undefined) {
 
@@ -222,12 +197,6 @@ async function OpenPage(AppendTo: HTMLElement | undefined = undefined) {
         </div>
     `;
 
-  if ($viewControlsPosition.get() === "Top") {
-    elem.classList.add("ViewControlsPosition_Top")
-  } else if ($viewControlsPosition.get() === "Bottom") {
-    elem.classList.add("ViewControlsPosition_Bottom")
-  }
-
   /* 
         <div class="SongMoreInfo">
             <div class="Content">
@@ -264,25 +233,7 @@ async function OpenPage(AppendTo: HTMLElement | undefined = undefined) {
     elem.classList.add("SimpleLyricsMode");
   }
 
-  if ($minimalLyricsMode.get()) {
-    elem.classList.add("MinimalLyricsMode");
-  }
-
-  if (!$lineHoverBackground.get()) {
-    elem.classList.add("NoLineHoverBackground");
-  }
-
-  if ($creditsFollowLastLine.get()) {
-    elem.classList.add("CreditsFollowLastLine");
-  }
-
-  // Gates the raised .PlaybackControls / tightened .Heart offsets that make room for
-  // the volume band — without it, turning the setting off would leave a gap.
-  if ($showVolumeSlider.get()) {
-    elem.classList.add("ShowVolumeSlider");
-  }
-
-  ApplyExperimentClasses(elem);
+  elem.classList.toggle("ShowLyricsSkeleton", $lyricsSkeleton.get());
 
   const contentBox = elem.querySelector<HTMLElement>(
     ".ContentBox"
@@ -318,16 +269,7 @@ async function OpenPage(AppendTo: HTMLElement | undefined = undefined) {
     Session_NowBar_SetSide();
 
     AppendViewControls();
-
-    DisableCompactMode();
   }
-
-  PageResizeListener = new ResizeObserver(() => {
-    if (!Fullscreen.IsOpen || !Fullscreen.CinemaViewOpen) return;
-    Compactify(elem);
-  });
-
-  PageResizeListener.observe(elem);
 
   if (AppendTo === undefined) {
     const legacyPage = document.querySelector<HTMLElement>(
@@ -361,24 +303,6 @@ async function OpenPage(AppendTo: HTMLElement | undefined = undefined) {
     UpdateSongMoreInfo();
 }) */
 
-export const isSizeReadyToBeCompacted = () =>
-  window.matchMedia("(max-width: 70.812rem)").matches;
-
-export function Compactify(Element: HTMLElement | undefined = undefined) {
-  if (!Fullscreen.IsOpen) return;
-  const elem = Element ?? PageContainer;
-  if (!elem) return;
-  if (isSizeReadyToBeCompacted()) {
-    elem.classList.add("CompactifyEnabledCompactMode");
-    EnableCompactMode();
-  } else {
-    if (!elem.classList.contains("CompactifyEnabledCompactMode")) return;
-    elem.classList.remove("CompactifyEnabledCompactMode");
-    if (elem.classList.contains("ForcedCompactMode")) return;
-    DisableCompactMode();
-  }
-}
-
 // Deliberately synchronous (async only so callers can keep awaiting it): an
 // await in here let an Open, a second Destroy, or a Fullscreen close tail run
 // against a half torn-down page.
@@ -396,8 +320,6 @@ async function DestroyPage() {
 
   ResetLastLine();
   CleanupScrollEvents();
-  PageResizeListener?.disconnect(); // Disconnect the observer
-  PageResizeListener = null;
   $lyricsContainerExists.set(false);
   DestroyAllLyricsContainers();
   CleanUpIsByCommunity();
@@ -464,20 +386,6 @@ function AppendViewControls(ReAppend: boolean = false) {
   const isNoLyrics =
     $currentLyricsData.get() === `NO_LYRICS:${SpotifyPlayer.GetUri()}`;
   elem.innerHTML = `
-        ${
-          Fullscreen.IsOpen || Fullscreen.CinemaViewOpen
-            ? ""
-          : `<button id="CinemaView" class="ViewControl">${Icons.CinemaView}</button>`
-        }
-        ${
-          Fullscreen.IsOpen || Fullscreen.CinemaViewOpen
-            ? `<button id="CompactModeToggle" class="ViewControl">${
-                IsCompactMode()
-                  ? Icons.DisableCompactModeIcon
-                  : Icons.EnableCompactModeIcon
-              }</button>`
-            : ""
-        }
         <button id="RomanizationToggle" class="ViewControl">
           ${
             isRomanized
@@ -486,8 +394,7 @@ function AppendViewControls(ReAppend: boolean = false) {
           }
         </button>
         ${
-          !Fullscreen.IsOpen &&
-          !Fullscreen.CinemaViewOpen
+          !Fullscreen.IsOpen
             ? `<button id="NowBarToggle" class="ViewControl">${Icons.NowBar}</button>`
             : ""
         }
@@ -496,15 +403,9 @@ function AppendViewControls(ReAppend: boolean = false) {
             ? `<button id="NowBarSideToggle" class="ViewControl">${Icons.NowBarSideSwap}</button>`
             : ""
         }
-        ${
-          Fullscreen.IsOpen
-            ? `<button id="FullscreenToggle" class="ViewControl">${
-                Fullscreen.CinemaViewOpen
-                  ? Icons.Fullscreen
-                  : Icons.CloseFullscreen
-              }</button>`
-            : ""
-        }
+        <button id="FullscreenToggle" class="ViewControl">${
+          Fullscreen.IsOpen ? Icons.CloseFullscreen : Icons.Fullscreen
+        }</button>
         <button id="LyricsManager" class="ViewControl">${Icons.LyricsManager}</button>
         <button id="SettingsToggle" class="ViewControl">${Icons.Settings}</button>
         <button id="Close" class="ViewControl">${Icons.Close}</button>
@@ -565,39 +466,6 @@ function AppendViewControls(ReAppend: boolean = false) {
       }
     }
 
-    const compactModeToggle = elem.querySelector("#CompactModeToggle");
-    if (compactModeToggle) {
-      try {
-        Tooltips.CompactModeToggle = createTooltip(compactModeToggle, {
-          ...Spicetify.TippyProps,
-          content: `${
-            IsCompactMode() ? "Disable Compact Mode" : "Enable Compact Mode"
-          }`,
-        });
-        compactModeToggle.addEventListener("click", () => {
-          // Use PageContainer instead of document.querySelector
-          const SpicyLyricsPage = PageContainer;
-          if (Fullscreen.IsOpen || Fullscreen.CinemaViewOpen) {
-            if (IsCompactMode()) {
-              SpicyLyricsPage?.classList.remove("ForcedCompactMode");
-              DisableCompactMode();
-              $forceCompactMode.set(false);
-            } else {
-              SpicyLyricsPage?.classList.add("ForcedCompactMode");
-              EnableCompactMode();
-              $forceCompactMode.set(true);
-            }
-
-            setTimeout(() => {
-              AppendViewControls(true);
-            }, 65);
-          }
-        });
-      } catch (err) {
-        controlsLogger.warn("Failed to setup Compact Mode tooltip", err);
-      }
-    }
-
     const romanizationToggle = elem.querySelector("#RomanizationToggle");
     if (romanizationToggle) {
       try {
@@ -631,7 +499,7 @@ function AppendViewControls(ReAppend: boolean = false) {
       }
     }
 
-    if (!Fullscreen.IsOpen && !Fullscreen.CinemaViewOpen) {
+    if (!Fullscreen.IsOpen) {
       const nowBarButton = elem.querySelector("#NowBarToggle");
       if (nowBarButton) {
         try {
@@ -652,40 +520,18 @@ function AppendViewControls(ReAppend: boolean = false) {
       try {
         Tooltips.FullscreenToggle = createTooltip(fullscreenBtn, {
           ...Spicetify.TippyProps,
-          content: `${
-            Fullscreen.CinemaViewOpen ? "Fullscreen" : "Cinema View"
-          }`,
+          content: Fullscreen.IsOpen ? "Close Fullscreen" : "Fullscreen",
         });
         fullscreenBtn.addEventListener("click", async () => {
-          // If we're in cinema view, go to full fullscreen
-          if (Fullscreen.CinemaViewOpen) {
-            Fullscreen.CinemaViewOpen = false;
-            await EnterSpicyLyricsFullscreen();
-            PageView.AppendViewControls(true);
+          if (Fullscreen.IsOpen) {
+            await Fullscreen.Close();
           } else {
-            Fullscreen.CinemaViewOpen = true;
-            await ExitFullscreenElement();
-            PageView.AppendViewControls(true);
+            Fullscreen.Open();
           }
-          setTimeout(Compactify, 250);
+          PageView.AppendViewControls(true);
         });
       } catch (err) {
         controlsLogger.warn("Failed to setup Fullscreen tooltip", err);
-      }
-    }
-
-    const cinemaViewBtn = elem.querySelector("#CinemaView");
-    if (cinemaViewBtn && !Fullscreen.IsOpen) {
-      try {
-        Tooltips.CinemaView = createTooltip(cinemaViewBtn, {
-          ...Spicetify.TippyProps,
-          content: `Cinema View`,
-        });
-        cinemaViewBtn.addEventListener("click", async () => {
-          Fullscreen.Open(true);
-        });
-      } catch (err) {
-        controlsLogger.warn("Failed to setup Cinema View tooltip", err);
       }
     }
 
@@ -693,7 +539,7 @@ function AppendViewControls(ReAppend: boolean = false) {
     if (
       nowBarSideToggleBtn &&
       NowBarObj.Open &&
-      !(isNoLyrics && (Fullscreen.IsOpen || Fullscreen.CinemaViewOpen))
+      !(isNoLyrics && Fullscreen.IsOpen)
     ) {
       try {
         Tooltips.NowBarSideToggle = createTooltip(nowBarSideToggleBtn, {
@@ -748,29 +594,10 @@ $simpleLyricsMode.listen((v) => {
   if (uri) fetchLyrics(uri).then(ApplyLyrics);
 });
 
-$minimalLyricsMode.listen((v) => {
-  if (!PageContainer) return;
-  PageContainer.classList.toggle("MinimalLyricsMode", v);
-  const uri = SpotifyPlayer.GetUri();
-  $currentLyricsData.set("");
-  if (uri) fetchLyrics(uri).then(ApplyLyrics);
-});
-
 $joinSplitWords.listen(() => {
   const uri = SpotifyPlayer.GetUri();
   $currentLyricsData.set("");
   if (uri) fetchLyrics(uri).then(ApplyLyrics);
-});
-
-// Purely a CSS toggle — no need to re-render the lyrics like the modes above do.
-$lineHoverBackground.listen((v) => {
-  if (!PageContainer) return;
-  PageContainer.classList.toggle("NoLineHoverBackground", !v);
-});
-
-$creditsFollowLastLine.listen((v) => {
-  if (!PageContainer) return;
-  PageContainer.classList.toggle("CreditsFollowLastLine", v);
 });
 
 $skipSpicyFont.listen((v) => {
@@ -778,34 +605,10 @@ $skipSpicyFont.listen((v) => {
   PageContainer.classList.toggle("UseSpicyFont", !v);
 });
 
-// Purely a CSS gate — NowBar.ts handles rebuilding the band itself.
-$showVolumeSlider.listen((v) => {
+// Purely a CSS gate for the loading placeholder.
+$lyricsSkeleton.listen((v) => {
   if (!PageContainer) return;
-  PageContainer.classList.toggle("ShowVolumeSlider", v);
-});
-
-// Experiments own their CSS hook here; NowBar.ts handles the rebuild for the ones
-// that need one. Adding an experiment requires no change to this file.
-onExperimentChange((experiment) => {
-  if (!PageContainer) return;
-  ApplyExperimentClasses(PageContainer);
-  // Its letter split and word springs are fixed when the lyrics are built, so rebuild them.
-  if (experiment.id === "refreshedSimpleLyrics" && $simpleLyricsMode.get()) {
-    const uri = SpotifyPlayer.GetUri();
-    $currentLyricsData.set("");
-    if (uri) fetchLyrics(uri).then(ApplyLyrics);
-  }
-});
-onExperimentDefinitionChange(() => {
-  if (!PageContainer) return;
-  ApplyExperimentClasses(PageContainer);
-});
-
-$viewControlsPosition.listen((v) => {
-  if (!PageContainer) return;
-  PageContainer.classList.toggle("ViewControlsPosition_Top", v === "Top");
-  PageContainer.classList.toggle("ViewControlsPosition_Bottom", v === "Bottom");
-  AppendViewControls(true);
+  PageContainer.classList.toggle("ShowLyricsSkeleton", v);
 });
 
 export default PageView;

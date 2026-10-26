@@ -1,5 +1,4 @@
 import { $simpleLyricsMode } from "../../../../utils/stores.ts";
-import { isExperimentEnabled } from "../../../experiments.ts";
 
 // The shortest word that can be split, per mode.
 const MinDuration = 1000;
@@ -9,20 +8,7 @@ const Simple = (letterLength: number, totalDuration: number) => {
   return totalDuration >= MinDuration;
 };
 
-// Refreshed Simple Lyrics: only words held a second or more with
-// two to seven letters are split. A longer held word ("starfucker,") fills like
-// any other word.
-export const RefreshedMaxLetters = 7;
-const RefreshedMinLetters = 2;
-
 const SimpleLyricsModeCapable = (letterLength: number, totalDuration: number) => {
-  if (isExperimentEnabled("refreshedSimpleLyrics")) {
-    return (
-      letterLength >= RefreshedMinLetters &&
-      letterLength <= RefreshedMaxLetters &&
-      totalDuration >= MinDuration
-    );
-  }
   if (letterLength > 12) {
     return false;
   }
@@ -52,7 +38,7 @@ const _Complex = (letterLength: number, totalDuration: number) => {
  */
 export function MinLetterCapableDuration(): number {
   if (!$simpleLyricsMode.get()) return MinDuration;
-  return isExperimentEnabled("refreshedSimpleLyrics") ? MinDuration : SimpleLyricsModeMinDuration;
+  return SimpleLyricsModeMinDuration;
 }
 
 export function IsLetterCapable(letterLength: number, totalDuration: number) {

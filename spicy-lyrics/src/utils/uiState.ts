@@ -20,7 +20,6 @@ function migrateUiStateKeys(blob: Record<string, any>): Record<string, any> {
   const renames: Record<string, string> = {
     "IsNowBarOpen": "isNowBarOpen",
     "NowBarSide": "nowBarSide",
-    "ForceCompactMode": "forceCompactMode",
     "previous-version": "previousVersion",
   };
   let changed = false;
@@ -49,7 +48,6 @@ function persistAtom<T>(key: string, defaultValue: T) {
 // UI state atoms (persisted, not settings-panel entries)
 export const $isNowBarOpen = persistAtom<boolean>("isNowBarOpen", false);
 export const $nowBarSide = persistAtom<"left" | "right">("nowBarSide", "left");
-export const $forceCompactMode = persistAtom<boolean>("forceCompactMode", false);
 export const $romanization = persistAtom<boolean>("romanization", false);
 export const $fromVersion = persistAtom<string>("fromVersion", "");
 export const $lastFetchedUri = persistAtom<string | null>("lastFetchedUri", null);

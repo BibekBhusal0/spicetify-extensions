@@ -1,12 +1,9 @@
-import { useStore } from "@nanostores/react";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { $experimentOverrides } from "../../../utils/experiments.ts";
 import { PopupModal } from "../../Modal.ts";
 import { advancedSection } from "./AdvancedSection.tsx";
 import { appearanceSection } from "./AppearanceSection.tsx";
 import { backgroundSection } from "./BackgroundSection.tsx";
 import { Highlight, Row, SearchBar } from "./components.tsx";
-import { experimentsSection } from "./ExperimentsSection.tsx";
 import { ChevronIcon, CloseIcon } from "./icons.tsx";
 import { interfaceSection } from "./InterfaceSection.tsx";
 import { lyricsSection } from "./LyricsSection.tsx";
@@ -26,7 +23,6 @@ const SECTIONS: SectionDef[] = [
   interfaceSection,
   backgroundSection,
   appearanceSection,
-  experimentsSection,
   advancedSection,
 ];
 
@@ -40,11 +36,8 @@ const notDisabled = () => false as const;
 function SettingRow({ def, query }: { def: SettingDef; query: string }) {
   const useDisabled = def.useDisabled ?? notDisabled;
   const reason = useDisabled();
-  const useNote = def.useNote ?? notDisabled;
-  const note = useNote();
   const label = <Highlight text={def.label} query={query} />;
 
-  if (def.render) return <>{def.render(label)}</>;
   if (!def.Control) return null;
 
   const Control = def.Control;
@@ -55,7 +48,6 @@ function SettingRow({ def, query }: { def: SettingDef; query: string }) {
       stacked={def.stacked}
       disabled={!!reason}
       disabledReason={reason || undefined}
-      note={note || undefined}
     >
       <Control disabled={!!reason} label={def.label} />
     </Row>
@@ -82,9 +74,6 @@ function search(query: string): SearchHit[] {
 }
 
 export default function SettingsPanel() {
-  // Experiments' rows are rebuilt from the overrides, so they re-render with them.
-  useStore($experimentOverrides);
-
   const [tab, setTab] = useState<SectionId>(() => {
     sectionById(lastTab).onEnter?.();
     return lastTab;

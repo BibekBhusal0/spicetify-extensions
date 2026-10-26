@@ -27,7 +27,7 @@ import { SpotifyPlayer } from "./components/Global/SpotifyPlayer.ts";
 import PageView, { GetPageRoot, PageContainer } from "./components/Pages/PageView.ts";
 import LoadFonts, { ApplyFontPixel } from "./components/Styling/Fonts.ts";
 import { Icons } from "./components/Styling/Icons.ts";
-import Fullscreen, { EnterSpicyLyricsFullscreen, ExitFullscreenElement } from "./components/Utils/Fullscreen.ts";
+import Fullscreen from "./components/Utils/Fullscreen.ts";
 import { UpdateNowBar } from "./components/Utils/NowBar.ts";
 import { IsPlaying } from "./utils/Addons.ts";
 import { requestPositionSync } from "./utils/Gets/GetProgress.ts";
@@ -39,7 +39,6 @@ import { ScrollToActiveLine } from "./utils/Scrolling/ScrollToActiveLine.ts";
 import { ScrollSimplebar } from "./utils/Scrolling/Simplebar/ScrollSimplebar.ts";
 import { $fromVersion, $lastFetchedUri, $previousVersion } from "./utils/uiState.ts";
 import { CheckForUpdates } from "./utils/version/CheckForUpdates.tsx";
-import { needsMigration, showMigrationModal } from "./utils/migration/DataMigration.tsx";
 import "./css/settings-panel.css";
 import "./components/ReactComponents/LyricsManager/styles.css";
 import "./css/polyfills/generic-modal-polyfill.css";
@@ -58,7 +57,6 @@ import Whentil from "./modules/Whentil.ts";
 import App from "./utils/app.ts";
 import { initSession } from "./utils/SessionManager/index.ts";
 import { jitter } from "./utils/jitter.ts";
-import { StartExperimentOverridesSync } from "./utils/experiments.ts";
 import { getRemoteConfig, StartRemoteConfigSync } from "./utils/remoteConfig.ts";
 
 async function main() {
@@ -78,11 +76,6 @@ async function main() {
   await Platform.OnSpotifyReady;
 
   guardSpicetifyScrollingFix();
-
-  if (needsMigration()) {
-    showMigrationModal();
-    return;
-  }
 
   Global.SetScope("fullscreen.open", false);
 
@@ -111,7 +104,6 @@ async function main() {
   window._spicy_lyrics_metadata = {};
 
   void initSession();
-  StartExperimentOverridesSync();
 
   LoadFonts();
   ApplyFontPixel();
@@ -186,36 +178,6 @@ async function main() {
           }
         }
 
-        @keyframes Marquee_SongName_Compact {
-          0% {
-            transform: translateX(calc(0px + min(-100% + 100cqw, 0px) * 0));
-          }
-          10% {
-            transform: translateX(calc(0px + min(-100% + 100cqw, 0px) * 0));
-          }
-          90% {
-            transform: translateX(calc(0px + min(-100% + 100cqw, 0px) * 1));
-          }
-          100% {
-            transform: translateX(calc(0px + min(-100% + 100cqw, 0px) * 1));
-          }
-        }
-
-        @keyframes Marquee_Artists_Compact {
-          0% {
-            transform: translateX(calc(0px + min(-100% + 100cqw, 0px) * 0));
-          }
-          10% {
-            transform: translateX(calc(0px + min(-100% + 100cqw, 0px) * 0));
-          }
-          90% {
-            transform: translateX(calc(0px + min(-100% + 100cqw, 0px) * 1));
-          }
-          100% {
-            transform: translateX(calc(0px + min(-100% + 100cqw, 0px) * 1));
-          }
-        }
-
         @keyframes SL_SkeletonSweep {
           from {
             transform: translateX(-100%);
@@ -254,7 +216,7 @@ async function main() {
   // re-checked on arrival: navigating away first must not leave it armed for
   // whenever the page next opens, and a second click must not open it twice.
   let pendingFullscreenOpen: ReturnType<typeof Whentil.When> | null = null;
-  const openFullscreenOncePageMounts = (cinemaView: boolean) => {
+  const openFullscreenOncePageMounts = () => {
     pendingFullscreenOpen?.Cancel();
     pendingFullscreenOpen = Whentil.When(
       () => document.querySelector<HTMLElement>(":is(.Root__main-view, :where(#main-view)) #SpicyLyricsPage"),
@@ -262,7 +224,7 @@ async function main() {
         pendingFullscreenOpen = null;
         if (Spicetify.Platform.History.location?.pathname !== "/SpicyLyrics") return;
         if (Fullscreen.IsOpen) return;
-        Fullscreen.Open(cinemaView);
+        Fullscreen.Open();
       },
       1,
       5000
@@ -286,7 +248,7 @@ async function main() {
                 } else  */
               Session.Navigate({ pathname: "/SpicyLyrics" });
               if (Global.Saves.shift_key_pressed) {
-                openFullscreenOncePageMounts(true);
+                openFullscreenOncePageMounts();
               }
               //}
             } else {
@@ -306,7 +268,7 @@ async function main() {
           async (self) => {
             if (!self.active) {
               Session.Navigate({ pathname: "/SpicyLyrics" });
-              openFullscreenOncePageMounts(Global.Saves.shift_key_pressed ?? false);
+              openFullscreenOncePageMounts();
             } else {
               Session.GoBack();
             }
@@ -435,7 +397,7 @@ async function main() {
     }
 
     const npvPanelOpen = () =>
-      (document.querySelector(".Root__right-sidebar")?.offsetWidth ?? 0) > 150;
+      (document.querySelector<HTMLElement>(".Root__right-sidebar")?.offsetWidth ?? 0) > 150;
 
     function applyNpvSidebarBehavior(behavior: string) {
       if (behavior === "remember") return;
@@ -844,20 +806,6 @@ async function main() {
       }
     });
 
-    Spicetify.Keyboard.registerImportantShortcut(Spicetify.Keyboard.KEYS.F11, async () => {
-      if (Fullscreen.IsOpen) {
-        if (!Fullscreen.CinemaViewOpen) {
-          Fullscreen.CinemaViewOpen = true;
-          await ExitFullscreenElement();
-          PageView.AppendViewControls(true);
-        } else {
-          Fullscreen.CinemaViewOpen = false;
-          await EnterSpicyLyricsFullscreen();
-          PageView.AppendViewControls(true);
-        }
-      }
-    });
-
     Spicetify.Keyboard.registerImportantShortcut(
       { key: ",", ctrl: true, shift: true },
       () => openSettingsPanel()
@@ -865,7 +813,7 @@ async function main() {
   }, 3000);
 
   document.addEventListener("fullscreenchange", async () => {
-    if (!document.fullscreenElement && Fullscreen.IsOpen && !Fullscreen.CinemaViewOpen) {
+    if (!document.fullscreenElement && Fullscreen.IsOpen) {
       if (await Fullscreen.Close()) Session.GoBackFrom("/SpicyLyrics");
     }
   });

@@ -1,5 +1,5 @@
 import { PageContainer } from "../../components/Pages/PageView.ts";
-import { isExperimentEnabled } from "../experiments.ts";
+import { $lyricsSkeleton } from "../stores.ts";
 
 const DEFAULT_LABEL = "Loading Lyrics";
 
@@ -16,7 +16,7 @@ export const SkeletonMarkup = `
     </div>
   </div>`;
 
-export const IsLyricsSkeletonEnabled = () => isExperimentEnabled("lyricsSkeleton");
+export const IsLyricsSkeletonEnabled = () => $lyricsSkeleton.get();
 
 const getSkeleton = () =>
   PageContainer?.querySelector<HTMLElement>(".LyricsContainer .LyricsSkeleton") ?? null;

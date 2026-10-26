@@ -4,10 +4,8 @@ import {
   $scrollLeadEnabled,
   $scrollLeadMs,
   $seekFadeCompensation,
-  $simpleLyricsMode,
   $smoothScrolling,
 } from "../../../utils/stores.ts";
-import { $experiment, getExperiment } from "../../../utils/experiments.ts";
 import { Slider, Toggle } from "./components.tsx";
 import { PlaybackIcon } from "./icons.tsx";
 import type { GroupDef, SectionDef } from "./model.ts";
@@ -54,21 +52,11 @@ const groups: GroupDef[] = [
       {
         id: "smoothScrolling",
         label: "Smooth Scrolling",
-        useDisabled: () => {
-          const simple = useStore($simpleLyricsMode);
-          const refreshed = useStore($experiment("refreshedSimpleLyrics"));
-          return (
-            simple &&
-            refreshed &&
-            `${getExperiment("refreshedSimpleLyrics").label} scrolls the lyrics its own way while Simple Lyrics Mode is on.`
-          );
-        },
-        Control: ({ disabled, label }) => (
+        Control: ({ label }) => (
           <Toggle
             label={label}
             checked={useStore($smoothScrolling)}
             onChange={(v) => $smoothScrolling.set(v)}
-            disabled={disabled}
           />
         ),
       },

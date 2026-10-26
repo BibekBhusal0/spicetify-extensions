@@ -4,7 +4,7 @@ import { ProjectVersion } from "../../../project/config.ts";
 const EDGE_SERVICE_URL = "https://api.spicylyrics.org/bp/svc";
 const EDGE_INIT_URL = "https://api.spicylyrics.org/bp/init";
 
-export type EdgeLookupName = "config" | "experimentsState" | "version";
+export type EdgeLookupName = "config" | "version";
 
 export type EdgeLookupOptions = {
   /** Abort the request after this long, token fetch included. */

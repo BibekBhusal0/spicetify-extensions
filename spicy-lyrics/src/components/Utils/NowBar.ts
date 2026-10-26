@@ -2,8 +2,6 @@ import BlobURLMaker from "../../utils/BlobURLMaker.ts";
 import { GetCurrentLyricsContainerInstance } from "../../utils/Lyrics/Applyer/CreateLyricsContainer.ts";
 import { FormatPlaybackTime, SongProgressBar } from "./../../utils/Lyrics/SongProgressBar.ts";
 import { QueueForceScroll, ResetLastLine } from "../../utils/Scrolling/ScrollToActiveLine.ts";
-import { $showVolumeSlider, $timelineOutsideMediaContent } from "../../utils/stores.ts";
-import { onExperimentChange } from "../../utils/experiments.ts";
 import { $isNowBarOpen, $nowBarSide } from "../../utils/uiState.ts";
 import Global from "../Global/Global.ts";
 import Session from "../Global/Session.ts";
@@ -11,11 +9,8 @@ import { SpotifyPlayer } from "../Global/SpotifyPlayer.ts";
 import PageView, { PageContainer } from "../Pages/PageView.ts";
 import { Icons } from "../Styling/Icons.ts";
 import Fullscreen, {
-  CleanupMediaBox,
   IsFullscreenClosing,
-  SetControlsDragLock,
 } from "./Fullscreen.ts";
-import { IsCompactMode } from "./CompactMode.ts";
 import { Maid } from "../../modules/Maid.ts";
 import Scheduler from "../../modules/Scheduler.ts";
 import Whentil from "../../modules/Whentil.ts";
@@ -167,30 +162,11 @@ function ApplyMarquee(baseWidth, elementWidth, name) {
 let NowBarFullscreenMaid: Maid | null = null;
 
 function PositionTimelineElement(TimelineElem: HTMLElement) {
-  const forceInsideMediaContent = IsCompactMode() || !$timelineOutsideMediaContent.get();
-  if (forceInsideMediaContent) {
-    // In CompactMode or when setting is off: place inside .MediaContent
-    const MediaContent = PageContainer?.querySelector<HTMLElement>(
-      ".ContentBox .NowBar .Header .MediaBox .MediaContent"
-    );
-    if (MediaContent && TimelineElem.parentNode !== MediaContent) {
-      MediaContent.appendChild(TimelineElem);
-    }
-  } else {
-    // Setting is on and no forced-inside condition: place in .Header before .Metadata
-    const Header = PageContainer?.querySelector<HTMLElement>(".ContentBox .NowBar .Header");
-    const Metadata = Header?.querySelector<HTMLElement>(".Metadata");
-    if (Header && Metadata && TimelineElem.parentNode !== Header) {
-      Header.insertBefore(TimelineElem, Metadata);
-    }
+  const Header = PageContainer?.querySelector<HTMLElement>(".ContentBox .NowBar .Header");
+  const Metadata = Header?.querySelector<HTMLElement>(".Metadata");
+  if (Header && Metadata && TimelineElem.parentNode !== Header) {
+    Header.insertBefore(TimelineElem, Metadata);
   }
-}
-
-function RepositionTimeline() {
-  if (!ActiveSetupSongProgressBarInstance) return;
-  const TimelineElem = ActiveSetupSongProgressBarInstance.GetElement();
-  if (!TimelineElem) return;
-  PositionTimelineElement(TimelineElem);
 }
 
 function OpenNowBar(skipSaving: boolean = false) {
@@ -571,8 +547,6 @@ function OpenNowBar(skipSaving: boolean = false) {
           // so it tracks the pointer 1:1.
           SliderBar.classList.add("Dragging");
           dragDoc.body.style.userSelect = "none"; // Prevent text selection during drag
-          // Keep the overlay visible if the pointer leaves the artwork mid-drag
-          SetControlsDragLock(true);
 
           // Add the event listeners for drag movement and end
           dragDoc.addEventListener("mousemove", handleDragMove);
@@ -673,7 +647,6 @@ function OpenNowBar(skipSaving: boolean = false) {
           // After seeking, update the timeline state to reflect the new position
           updateTimelineState();
 
-          SetControlsDragLock(false);
         };
 
         const timelineMaid = new Maid();
@@ -704,7 +677,6 @@ function OpenNowBar(skipSaving: boolean = false) {
             isDragging = false;
             SliderBar.classList.remove("Dragging");
             dragDoc.body.style.userSelect = "";
-            SetControlsDragLock(false);
           }
         });
 
@@ -722,13 +694,7 @@ function OpenNowBar(skipSaving: boolean = false) {
 
         return {
           Apply: () => {
-            if (IsCompactMode() || !$timelineOutsideMediaContent.get()) {
-              // Timeline goes inside MediaContent — must use AppendQueue
-              // because Whentil.When wipes MediaContent with innerHTML = ""
-              AppendQueue.push(TimelineElem);
-            } else {
-              PositionTimelineElement(TimelineElem);
-            }
+            PositionTimelineElement(TimelineElem);
           },
           GetElement: () => TimelineElem,
           CleanUp: cleanup,
@@ -899,9 +865,6 @@ function OpenNowBar(skipSaving: boolean = false) {
           // glide so it tracks the pointer 1:1.
           VolumeElement.classList.add("Dragging");
           dragDoc.body.style.userSelect = "none";
-          // Keep the overlay from fading out when the pointer leaves the artwork
-          // while the fill is still held.
-          SetControlsDragLock(true);
 
           dragDoc.addEventListener("mousemove", handleDragMove);
           dragDoc.addEventListener("touchmove", handleDragMove);
@@ -949,7 +912,6 @@ function OpenNowBar(skipSaving: boolean = false) {
           } else {
             commit(percentageFromEvent(event));
           }
-          SetControlsDragLock(false);
         };
 
         // The browser took the touch over (a scroll, a system gesture): no touchend
@@ -960,7 +922,6 @@ function OpenNowBar(skipSaving: boolean = false) {
           lastTouchAt = performance.now();
           pendingIconTap = false;
           stopDrag();
-          SetControlsDragLock(false);
         };
 
         const wheelHandler = (event: WheelEvent) => {
@@ -1015,11 +976,9 @@ function OpenNowBar(skipSaving: boolean = false) {
         ActivePlaybackControlsInstance.Apply();
       }
 
-      if ($showVolumeSlider.get()) {
-        ActiveVolumeControlInstance = SetupVolumeControl();
-        if (ActiveVolumeControlInstance) {
-          ActiveVolumeControlInstance.Apply();
-        }
+      ActiveVolumeControlInstance = SetupVolumeControl();
+      if (ActiveVolumeControlInstance) {
+        ActiveVolumeControlInstance.Apply();
       }
 
       ActiveSetupSongProgressBarInstance = SetupSongProgressBar();
@@ -1426,7 +1385,6 @@ function UpdateNowBar(force = false) {
 
   //const ArtistsDiv = NowBar.querySelector(".Header .Metadata .Artists");
   const MetadataContainer = NowBar.querySelector(".Header .Metadata");
-  const ArtistsSpan = MetadataContainer.querySelector(".Artists span");
   const MediaImageContainer = NowBar.querySelector<HTMLDivElement>(".Header .MediaBox .MediaImageContainer");
   const SongNameSpan = MetadataContainer.querySelector<HTMLElement>(".SongName span");
   //const MediaBox = NowBar.querySelector(".Header .MediaBox");
@@ -1627,11 +1585,10 @@ function ApplySideSwap() {
   Session_NowBar_SetSide();
 }
 
-// The side the page shows: the stored one, except that compact mode and the centred
-// no-lyrics layout always lay out on the left. The stored side is left alone, so it
-// comes back once they end.
+// The side the page shows: the stored one, except that the centred
+// no-lyrics layout always lays out on the left. The stored side is left alone, so
+// it comes back once that ends.
 function ResolveNowBarSide(page: HTMLElement): "left" | "right" {
-  if (page.classList.contains("CompactMode")) return "left";
   if (page.querySelector(".ContentBox")?.classList.contains("LyricsHidden")) return "left";
   return $nowBarSide.get() === "right" ? "right" : "left";
 }
@@ -1763,7 +1720,6 @@ Global.Event.listen("playback:position", (e: number) => {
 
 Global.Event.listen("playback:volume", (volume: number) => {
   if (!Fullscreen.IsOpen) return;
-  if (!$showVolumeSlider.get()) return;
   if (!ActiveVolumeControlInstance) return;
   // Every setVolume we issue echoes straight back as a volume event — applying it
   // mid-drag would fight the handle under the cursor.
@@ -1773,47 +1729,15 @@ Global.Event.listen("playback:volume", (volume: number) => {
 
 Global.Event.listen("fullscreen:exit", () => {
   CleanUpActiveComponents();
-  CleanupMediaBox();
 });
 
 Global.Event.listen("page:destroy", () => {
-  CleanupMediaBox();
   CleanUpActiveComponents();
 });
 
 Global.Event.listen("nowbar:timeline:dragging", () => {
   ResetLastLine();
   QueueForceScroll();
-});
-
-Global.Event.listen("compact-mode:enable", () => {
-  RepositionTimeline();
-});
-
-Global.Event.listen("compact-mode:disable", () => {
-  RepositionTimeline();
-});
-
-$timelineOutsideMediaContent.subscribe(() => {
-  RepositionTimeline();
-});
-
-// The band is built inside OpenNowBar's fullscreen block, so toggling the setting
-// has to rebuild the overlay components rather than just show/hide an element.
-// `.listen` (not `.subscribe`) — this must not fire on module load.
-$showVolumeSlider.listen(() => {
-  if (!Fullscreen.IsOpen) return;
-  CleanUpActiveComponents();
-  OpenNowBar(true);
-});
-
-// Experiments flagged `rebuildsNowBar` change the overlay's markup, not just its
-// CSS, so the components have to be rebuilt the same way the setting above does.
-onExperimentChange((experiment) => {
-  if (!experiment.rebuildsNowBar) return;
-  if (!Fullscreen.IsOpen) return;
-  CleanUpActiveComponents();
-  OpenNowBar(true);
 });
 
 export {

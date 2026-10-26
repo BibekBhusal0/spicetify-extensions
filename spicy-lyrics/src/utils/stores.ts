@@ -44,11 +44,7 @@ function migrateSettingsKeys(blob: Record<string, any>): Record<string, any> {
 
 const _settings: Record<string, any> = migrateSettingsKeys(readSettingsBlob());
 
-/**
- * An atom backed by the settings blob. Exported so feature modules (e.g.
- * `experiments.ts`) can register their own persisted settings without having to
- * add a line here for every one.
- */
+/** An atom backed by the settings blob. */
 export function persistAtom<T>(key: string, defaultValue: T) {
   const store = atom<T>(_settings[key] !== undefined ? _settings[key] : defaultValue);
   let saveTimer: ReturnType<typeof setTimeout> | undefined;
@@ -64,30 +60,15 @@ export function persistAtom<T>(key: string, defaultValue: T) {
 
 // Setting atoms (persisted)
 export const $simpleLyricsMode = persistAtom<boolean>("simpleLyricsMode", true);
-export const $minimalLyricsMode = persistAtom<boolean>("minimalLyricsMode", false);
 // Shows a word sung in syllables as one word when its parts line up evenly.
 export const $joinSplitWords = persistAtom<boolean>("joinSplitWords", false);
-// Tinted box drawn behind a lyrics line while the pointer is over it.
-export const $lineHoverBackground = persistAtom<boolean>("lineHoverBackground", true);
-// When a song ends on a duet line sung from the right, the credits under it
-// (writers, provider, community info) move to the right with it.
-export const $creditsFollowLastLine = persistAtom<boolean>("creditsFollowLastLine", false);
 export const $skipSpicyFont = persistAtom<boolean>("skipSpicyFont", true);
-// Off: a song that simply has no lyrics shows only the song info. Errors still show their notice.
-export const $showNoLyricsNotice = persistAtom<boolean>("showNoLyricsNotice", true);
 // Hide Spotify's own lyrics button in the playback bar (ours is left alone).
 export const $removeSpotifyLyricsButton = persistAtom<boolean>("removeSpotifyLyricsButton", true);
-export const $lockedMediaBox =persistAtom<boolean>("lockedMediaBox", false);
-export const $viewControlsPosition = persistAtom<string>("viewControlsPosition", "Top");
+export const $lyricsSkeleton = persistAtom<boolean>("lyricsSkeleton", true);
 // Last upload mode picked in the Local DB upload screen: "persistent" | "temporary".
 export const $ttmlUploadMode = persistAtom<string>("ttmlUploadMode", "persistent");
 export const $developerMode = persistAtom<boolean>("developerMode", false);
-export const $timelineOutsideMediaContent = persistAtom<boolean>(
-  "timelineOutsideMediaContent",
-  true
-);
-// Volume band below the playback controls in Fullscreen and Cinema View.
-export const $showVolumeSlider = persistAtom<boolean>("showVolumeSlider", true);
 // Control Spotify's Now Playing View sidebar: "remember" | "always-close" | "always-open"
 export const $npvSidebarBehavior = persistAtom<string>("npvSidebarBehavior", "remember");
 // Playback timing offset in milliseconds (bipolar: negative = earlier, positive = later)

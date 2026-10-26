@@ -1,5 +1,10 @@
 import { isDev } from "../../components/Global/Defaults.ts";
-import { $currentLyricsData, $currentLyricsType, $currentlyFetching } from "../stores.ts";
+import {
+  $currentLyricsData,
+  $currentLyricsType,
+  $currentlyFetching,
+  $lyricsSkeleton,
+} from "../stores.ts";
 import Platform from "../../components/Global/Platform.ts";
 import { SpotifyPlayer } from "../../components/Global/SpotifyPlayer.ts";
 import PageView, { PageContainer } from "../../components/Pages/PageView.ts";
@@ -14,7 +19,6 @@ import { SetShownNotice, SyncNoLyricsLayout } from "./LyricsNotice.ts";
 import { GetExpireStore } from "../../modules/Store.ts";
 import { SLObjPack } from "../objpack.ts";
 import { HideLyricsSkeleton, IsLyricsSkeletonEnabled, ShowLyricsSkeleton } from "./LyricsSkeleton.ts";
-import { onExperimentChange } from "../experiments.ts";
 import { getRemoteConfig } from "../remoteConfig.ts";
 
 const lyricsLogger = new Logger("Lyrics Pipeline");
@@ -304,7 +308,7 @@ async function runFetchLyrics(uri: string): Promise<[object | string, number] | 
         // Tag the cached payload with the current uri so the saved-data and
         // re-fetch checks (which match on uri) recognise it — older cache
         // entries predate the uri field.
-        const lyricsFromCache = { ...(lyricsFromCacheRes ?? {}), uri };
+        const lyricsFromCache = { ...lyricsFromCacheRes, uri };
         if (isStaleFetch(uri)) return [{ ...lyricsFromCache, fromCache: true }, 200];
         $currentLyricsData.set(JSON.stringify(lyricsFromCache));
         presentLyrics(lyricsFromCache);
@@ -610,11 +614,10 @@ export function HideLoaderContainer(): void {
   }
 }
 
-// The CSS hides whichever loader the experiment isn't using, so flipping it
-// mid-fetch would hide the one that went up and leave nothing in its place.
-// Hand the loading state, and any queue message, across to the other one.
-onExperimentChange((experiment) => {
-  if (experiment.id !== "lyricsSkeleton") return;
+// The CSS shows whichever loader the setting selects, so flipping it mid-fetch
+// would hide the one that went up and leave nothing in its place. Hand the
+// loading state, and any queue message, across to the other one.
+$lyricsSkeleton.listen(() => {
   const loaderContainer = PageContainer?.querySelector<HTMLElement>(
     ".LyricsContainer .loaderContainer"
   );

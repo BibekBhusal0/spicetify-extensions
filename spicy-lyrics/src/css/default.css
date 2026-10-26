@@ -1,8 +1,3 @@
-:root {
-  --bg-rotation-degree: 258deg;
-  /* --sltoaster-bottom-padding: 104px; */
-}
-
 :root:has(#SpicyLyricsPage.Fullscreen) {
   --sltoaster-bottom-padding: 32px;
 }
@@ -82,15 +77,11 @@
   opacity: 0;
 }
 
-#SpicyLyricsPage.ViewControlsPosition_Bottom:not(.Fullscreen) .ViewControls {
-  bottom: 24px;
-}
-
-#SpicyLyricsPage.ViewControlsPosition_Top:not(.Fullscreen) .ViewControls {
+#SpicyLyricsPage:not(.Fullscreen) .ViewControls {
   top: 24px;
 }
 
-.Root:not(.global-nav) :is(.Root__main-view, :where(#main-view)) #SpicyLyricsPage.ViewControlsPosition_Top:not(.Fullscreen) .ViewControls {
+.Root:not(.global-nav) :is(.Root__main-view, :where(#main-view)) #SpicyLyricsPage:not(.Fullscreen) .ViewControls {
   bottom: 36px;
   top: unset;
 }
@@ -312,10 +303,6 @@ sl-generic-modal.SpicyLyricsModal .sl-modal-overlay {
 
 #SpicyLyricsPage:not(.Lyrics_RomanizationAvailable) .ViewControls #RomanizationToggle,
 #SpicyLyricsPage:not(.SpicyRenderer) .ViewControls #RomanizationToggle {
-  display: none !important;
-}
-
-#SpicyLyricsPage.CompactifyEnabledCompactMode .ViewControls .ViewControl#CompactModeToggle {
   display: none !important;
 }
 
