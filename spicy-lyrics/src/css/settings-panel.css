@@ -70,8 +70,7 @@ sl-generic-modal.SpicyLyricsModal .sl-modal-overlay {
 
   .sl-sp-tab,
   .sl-sp-group-title,
-  .sl-sp-close,
-  .sl-sp-slider button {
+  .sl-sp-close {
     color: var(--spice-text);
     background: transparent;
     border: 0;
@@ -159,6 +158,10 @@ sl-generic-modal.SpicyLyricsModal .sl-modal-overlay {
   .sl-sp-row--stacked {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .sl-sp-row--stacked .sl-sp-control {
+    width: 100%;
   }
 
   .sl-sp-label-wrap {
@@ -253,42 +256,165 @@ sl-generic-modal.SpicyLyricsModal .sl-modal-overlay {
     width: 100%;
   }
 
+  /* Slider: a groove with a fill that grows toward the thumb, plus a value
+     readout and an inline Reset. */
   .sl-sp-slider {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    width: min(420px, 100%);
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
   }
 
-  .sl-sp-slider input {
-    flex: 1;
-    min-width: 100px;
+  .sl-sp-slider-track-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 20px;
+  }
+
+  .sl-sp-slider-track,
+  .sl-sp-slider-fill {
+    position: absolute;
+    top: 50%;
     height: 4px;
-    margin: 10px 0;
+    transform: translateY(-50%);
     border-radius: 999px;
+    pointer-events: none;
+  }
+
+  .sl-sp-slider-track {
+    left: 0;
+    right: 0;
+    background: color-mix(in srgb, var(--spice-text) 18%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--spice-text) 8%, transparent);
+  }
+
+  .sl-sp-slider-fill {
+    background: var(--spice-button);
+  }
+
+  .sl-sp-slider-center {
+    position: absolute;
+    top: 50%;
+    width: 2px;
+    height: 12px;
+    transform: translate(-50%, -50%);
+    border-radius: 1px;
+    background: color-mix(in srgb, var(--spice-text) 40%, transparent);
+    pointer-events: none;
+  }
+
+  .sl-sp-slider-input {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 20px;
+    margin: 0;
+    background: transparent;
     appearance: none;
-    background: var(--spice-subtext);
     cursor: pointer;
   }
 
-  .sl-sp-slider input::-webkit-slider-thumb {
-    width: 14px;
-    height: 14px;
+  .sl-sp-slider-input::-webkit-slider-runnable-track {
+    height: 4px;
+    background: transparent;
+  }
+
+  .sl-sp-slider-input::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
+    margin-top: -6px;
     border: 0;
     border-radius: 50%;
     appearance: none;
-    background: var(--spice-button);
+    background: var(--spice-text);
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(0, 0, 0, 0.18);
+    cursor: grab;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
   }
 
-  .sl-sp-slider input::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
+  .sl-sp-slider-input::-moz-range-track {
+    height: 4px;
+    background: transparent;
+  }
+
+  .sl-sp-slider-input::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
     border: 0;
     border-radius: 50%;
-    background: var(--spice-button);
+    background: var(--spice-text);
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(0, 0, 0, 0.18);
+    cursor: grab;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
   }
 
-  .sl-sp-slider button,
+  .sl-sp-slider-input:hover:not(:disabled)::-webkit-slider-thumb {
+    transform: scale(1.1);
+  }
+
+  .sl-sp-slider-input:active:not(:disabled)::-webkit-slider-thumb {
+    transform: scale(0.92);
+    cursor: grabbing;
+  }
+
+  .sl-sp .sl-sp-slider-input:focus-visible {
+    outline: none;
+  }
+
+  .sl-sp-slider-input:focus-visible::-webkit-slider-thumb {
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(0, 0, 0, 0.18),
+      0 0 0 4px color-mix(in srgb, var(--spice-button) 30%, transparent);
+  }
+
+  .sl-sp-slider-input:focus-visible::-moz-range-thumb {
+    box-shadow:
+      0 2px 6px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(0, 0, 0, 0.18),
+      0 0 0 4px color-mix(in srgb, var(--spice-button) 30%, transparent);
+  }
+
+  .sl-sp-slider-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 18px;
+  }
+
+  .sl-sp-slider-value {
+    color: var(--spice-subtext);
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sl-sp-slider-reset {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--spice-subtext);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .sl-sp-slider-reset:hover {
+    color: var(--spice-text);
+  }
+
+  .sl-sp-slider--disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
   .sl-sp-btn {
     padding: 6px 10px;
     border-radius: 999px;
@@ -299,15 +425,9 @@ sl-generic-modal.SpicyLyricsModal .sl-modal-overlay {
     font-weight: 600;
   }
 
-  .sl-sp-slider button:hover,
   .sl-sp-btn:hover {
     background: rgba(255, 70, 70, 0.25);
     border-color: rgba(255, 70, 70, 0.5);
-  }
-
-  .sl-sp-slider output {
-    min-width: 48px;
-    text-align: right;
   }
 
   .sl-sp-empty {
