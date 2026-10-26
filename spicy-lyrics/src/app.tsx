@@ -14,6 +14,7 @@ import "./css/font-pack/font-pack.css";
 import ApplyStaticBackground from "./components/Styling/StaticBackground.ts";
 import {
   $currentLyricsData,
+  $lyricsContainerExists,
   $npvSidebarBehavior,
   $removeSpotifyLyricsButton,
   $spicyLyricsVersion,
