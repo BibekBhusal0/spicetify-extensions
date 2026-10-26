@@ -68,7 +68,6 @@ export const $removeSpotifyLyricsButton = persistAtom<boolean>("removeSpotifyLyr
 export const $lyricsSkeleton = persistAtom<boolean>("lyricsSkeleton", true);
 // Last upload mode picked in the Local DB upload screen: "persistent" | "temporary".
 export const $ttmlUploadMode = persistAtom<string>("ttmlUploadMode", "persistent");
-export const $developerMode = persistAtom<boolean>("developerMode", false);
 // Control Spotify's Now Playing View sidebar: "remember" | "always-close" | "always-open"
 export const $npvSidebarBehavior = persistAtom<string>("npvSidebarBehavior", "remember");
 // Playback timing offset in milliseconds (bipolar: negative = earlier, positive = later)

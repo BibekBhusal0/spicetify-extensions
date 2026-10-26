@@ -1,10 +1,7 @@
-import { useStore } from "@nanostores/react";
 import {
   RemoveCurrentLyrics_AllCaches,
   RemoveLyricsCache,
 } from "../../../utils/LyricsCacheTools.ts";
-import { $developerMode } from "../../../utils/stores.ts";
-import { Toggle } from "./components.tsx";
 import { AdvancedIcon } from "./icons.tsx";
 import type { GroupDef, SectionDef } from "./model.ts";
 
@@ -34,23 +31,6 @@ const groups: GroupDef[] = [
           <button type="button" className="sl-sp-btn" onClick={() => RemoveLyricsCache(true)}>
             Clear
           </button>
-        ),
-      },
-    ],
-  },
-  {
-    title: "Developer",
-    settings: [
-      {
-        id: "developerMode",
-        label: "Developer Mode",
-        keywords: "debug logs",
-        Control: ({ label }) => (
-          <Toggle
-            label={label}
-            checked={useStore($developerMode)}
-            onChange={(v) => $developerMode.set(v)}
-          />
         ),
       },
     ],

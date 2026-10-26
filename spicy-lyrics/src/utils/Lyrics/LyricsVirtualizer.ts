@@ -1554,7 +1554,7 @@ class LyricsVirtualizer {
     // Gated on isEnabled rather than left to Logger.debug's own early return:
     // arguments are evaluated at the call site, so building this payload cost a
     // forced style recalc (getComputedStyle) plus five layout reads on EVERY
-    // retry — up to 31 per scroll — even with developer mode off. Sitting between
+    // retry — up to 31 per scroll — even with debug logging off. Sitting between
     // the scrollTo() above and the measureElement() reads below, that turned the
     // convergence chain into sustained layout thrash while the lyrics render.
     if (virtualizerLogger.isEnabled) {

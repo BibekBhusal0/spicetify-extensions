@@ -1,6 +1,6 @@
 import { ProjectName } from "../../project/config";
 import { Maid } from "../modules/Maid";
-import { $developerMode } from "./stores";
+import App from "./app";
 
 class Logger {
   private maid: Maid;
@@ -11,13 +11,7 @@ class Logger {
   constructor(prefix?: string) {
     this.maid = new Maid();
     this.prefix = `[${ProjectName}]${prefix ? ` (${prefix})` : ""}`;
-    this.isEnabled = $developerMode.get();
-
-    this.maid.Give(
-      $developerMode.subscribe((v) => {
-        this.isEnabled = v;
-      })
-    )
+    this.isEnabled = App.isDev();
   }
 
   private getPrefixArgs(): [string, string] {
@@ -31,15 +25,15 @@ class Logger {
   }
 
   warn(...args: unknown[]) {
-    // Warnings always reach the console — they surface real runtime issues
-    // that users (and bug reports) need to see regardless of developer mode.
+    // Warnings always reach the console: they surface real runtime issues that
+    // bug reports need.
     if (this.maid.IsDestroyed()) return;
     const [prefix, style] = this.getPrefixArgs();
     console.warn(prefix, style, ...args);
   }
 
   error(...args: unknown[]) {
-    // Errors always reach the console, regardless of developer mode.
+    // Errors always reach the console.
     if (this.maid.IsDestroyed()) return;
     const [prefix, style] = this.getPrefixArgs();
     console.error(prefix, style, ...args);

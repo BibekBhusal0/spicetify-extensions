@@ -18,7 +18,6 @@ import {
   $npvSidebarBehavior,
   $removeSpotifyLyricsButton,
   $spicyLyricsVersion,
-  $developerMode,
 } from "./utils/stores.ts";
 import Global from "./components/Global/Global.ts";
 import Platform from "./components/Global/Platform.ts";
@@ -68,7 +67,7 @@ async function main() {
   // fewer boot-time requests run on last session's values.
   StartRemoteConfigSync();
 
-  if (App.isDev() || $developerMode.get()) {
+  if (App.isDev()) {
     appLogger.debug("Boot sequence");
     exposeToWindow();
     appLogger.debug("Window helpers exposed");
