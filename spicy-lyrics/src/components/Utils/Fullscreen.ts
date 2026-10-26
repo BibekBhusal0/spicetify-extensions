@@ -8,9 +8,6 @@ import PageView, { Compactify, GetPageRoot, PageContainer, Tooltips } from "../P
 import { EnableCompactMode, IsCompactMode } from "./CompactMode.ts";
 import { CleanUpNowBarComponents, CloseNowBar, DeregisterNowBarBtn, OpenNowBar } from "./NowBar.ts";
 import TransferElement from "./TransferElement.ts";
-import { Spring } from "../../modules/Spring.ts";
-import { Maid } from "../../modules/Maid.ts";
-import Scheduler from "../../modules/Scheduler.ts";
 import { cancelCappedFrame, requestCappedFrame } from "../../utils/AnimationFrameLoop.ts";
 
 const Fullscreen = {
@@ -22,156 +19,7 @@ const Fullscreen = {
   CinemaViewOpen: false,
 };
 
-const ControlsMaid = new Maid();
-
-const controlsOpacitySpring = new Spring(0, 2, 2, 0); // Goal: 0.65
-const artworkBrightnessSpring = new Spring(0, 2, 2, 0); // Goal: 0.78
-
-let animationLastTimestamp: number | undefined;
-
-let visualsApplied = false;
-let pageHover = false;
-let mediaBoxHover = false;
-
-let lastPageMouseMove: number | undefined;
-
-const Page_MouseMove = () => {
-  pageHover = true;
-  lastPageMouseMove = performance.now();
-  ToggleControls();
-  if (!mediaBoxHover) {
-    MouseMoveChecker();
-  }
-};
-
-const MouseMoveChecker = () => {
-  const now = performance.now();
-  if (lastPageMouseMove !== undefined && now - lastPageMouseMove >= 750 && !mediaBoxHover) {
-    animationLastTimestamp = now;
-    ToggleControls(true);
-    ControlsMaid.Clean("MouseMoveChecker");
-    return;
-  }
-  ControlsMaid.Give(Scheduler.OnPreRender(MouseMoveChecker), "MouseMoveChecker");
-};
-
-const RunMediaBoxAnimation = () => {
-  const timestampNow = performance.now();
-
-  if (animationLastTimestamp !== undefined) {
-    const deltaTime = (timestampNow - animationLastTimestamp) / 1000;
-    const controlsOpacity = controlsOpacitySpring.Step(deltaTime);
-    const artworkBrightness = artworkBrightnessSpring.Step(deltaTime);
-    const MediaBox = PageContainer?.querySelector<HTMLElement>(
-      ".ContentBox .NowBar .Header .MediaBox"
-    );
-
-    if (MediaBox) {
-      MediaBox.style.setProperty("--ArtworkBrightness", artworkBrightness.toString());
-      MediaBox.style.setProperty("--ControlsOpacity", controlsOpacity.toString());
-    }
-
-    if (controlsOpacitySpring.CanSleep() && artworkBrightnessSpring.CanSleep()) {
-      animationLastTimestamp = undefined;
-      visualsApplied = false;
-      return;
-    }
-  }
-
-  animationLastTimestamp = timestampNow;
-
-  ControlsMaid.Give(Scheduler.OnPreRender(RunMediaBoxAnimation), "MediaBoxAnimation");
-};
-
-// While a slider handle is being dragged the pointer regularly leaves the MediaBox,
-// and `MediaBox_MouseOut` fires unconditionally — without this latch the controls
-// would fade out from under the cursor mid-drag.
-let controlsDragLock = false;
-
-export const SetControlsDragLock = (locked: boolean) => {
-  if (controlsDragLock === locked) return;
-  controlsDragLock = locked;
-  // Re-evaluate once the drag is over so the controls settle into whatever the
-  // hover state became while we were ignoring it.
-  if (!locked) ToggleControls(true);
-};
-
-const ToggleControls = (force: boolean = false) => {
-  if (controlsDragLock) return;
-
-  const now = performance.now();
-
-  const getControlsOpacityGoal = () => {
-    if (lastPageMouseMove !== undefined && now - lastPageMouseMove >= 750) {
-      return 0;
-    } else if (pageHover && !mediaBoxHover) {
-      return 0.65;
-    } else if (mediaBoxHover) {
-      return 0.985;
-    } else {
-      return 0;
-    }
-  };
-
-  const getArtworkBrightnessGoal = () => {
-    if (lastPageMouseMove !== undefined && now - lastPageMouseMove >= 750) {
-      return 1;
-    } else if (pageHover && !mediaBoxHover) {
-      return 0.78;
-    } else if (mediaBoxHover) {
-      return 0.55;
-    } else {
-      return 1;
-    }
-  };
-
-  for (const spring of [controlsOpacitySpring, artworkBrightnessSpring]) {
-    spring.SetFrequency(2);
-    spring.SetDampingRatio(2);
-  }
-
-  controlsOpacitySpring.SetGoal(getControlsOpacityGoal());
-  artworkBrightnessSpring.SetGoal(getArtworkBrightnessGoal());
-
-  if (force || visualsApplied === false) {
-    visualsApplied = true;
-    RunMediaBoxAnimation();
-  }
-};
-
 let EventAbortController: AbortController | undefined;
-
-const MediaBox_MouseIn = () => {
-  mediaBoxHover = true;
-  pageHover = true;
-  ToggleControls();
-  ControlsMaid.Clean("MouseMoveChecker");
-};
-
-const MediaBox_MouseOut = () => {
-  mediaBoxHover = false;
-  pageHover = true;
-  ToggleControls();
-};
-
-const MediaBox_MouseMove = () => {
-  mediaBoxHover = true;
-  pageHover = true;
-  ControlsMaid.Clean("MouseMoveChecker");
-  ToggleControls();
-};
-const Page_MouseIn = () => {
-  mediaBoxHover = false;
-  pageHover = true;
-  ToggleControls();
-};
-
-const Page_MouseOut = () => {
-  mediaBoxHover = false;
-  pageHover = false;
-  ToggleControls();
-  ControlsMaid.Clean("MouseMoveChecker");
-};
 
 /* Hides Spotify's UI behind the fullscreen page. content-visibility rather than
    display: none, so everything inside keeps its laid-out size. With display:
@@ -282,19 +130,9 @@ export const EnterSpicyLyricsFullscreen = async () => {
   setTimeout(Compactify, 1000);
 };
 
-function CleanupMediaBox() {
+export function CleanupMediaBox() {
   EventAbortController?.abort();
   EventAbortController = undefined;
-
-  ControlsMaid.CleanUp();
-
-  animationLastTimestamp = undefined;
-  lastPageMouseMove = undefined;
-
-  visualsApplied = false;
-  mediaBoxHover = false;
-  pageHover = false;
-  controlsDragLock = false;
 }
 
 // Bumped by every Open and Close. The deferred work either one schedules checks
@@ -376,44 +214,34 @@ function Open(skipDocumentFullscreen: boolean = false, moveElement: boolean = tr
       EventAbortController = new AbortController();
       const signal = EventAbortController.signal;
 
-      MediaBox.addEventListener("mouseenter", MediaBox_MouseIn, { signal });
-      MediaBox.addEventListener("mouseleave", MediaBox_MouseOut, { signal });
-      MediaBox.addEventListener("mousemove", MediaBox_MouseMove, { signal });
-
-      if (SpicyPage) {
-        SpicyPage.addEventListener("mouseenter", Page_MouseIn, { signal });
-        SpicyPage.addEventListener("mousemove", Page_MouseMove, { signal });
-        SpicyPage.addEventListener("mouseleave", Page_MouseOut, { signal });
-      }
-
       syncNativeChromeInsets(SpicyPage);
-        // Resize fires on every pointer move of a window drag; one measure per frame is enough.
-        let syncFrame: number | null = null;
-        const sync = () => {
-          if (syncFrame !== null) return;
-          syncFrame = requestCappedFrame(() => {
-            syncFrame = null;
-            syncNativeChromeInsets(SpicyPage);
-          });
-        };
-        signal.addEventListener("abort", () => {
-          if (syncFrame !== null) cancelCappedFrame(syncFrame);
+      // Resize fires on every pointer move of a window drag; one measure per frame is enough.
+      let syncFrame: number | null = null;
+      const sync = () => {
+        if (syncFrame !== null) return;
+        syncFrame = requestCappedFrame(() => {
+          syncFrame = null;
+          syncNativeChromeInsets(SpicyPage);
         });
-        window.addEventListener("resize", sync, { signal });
-        // On zoom, Spotify resizes the spacers only once it writes --zoom-level on .Root, after the resize event.
-        const root = document.querySelector<HTMLElement>(".Root");
-        if (root) {
-          // The attribute carries other values too; only a zoom change moves the spacers.
-          let zoom = root.style.getPropertyValue("--zoom-level");
-          const zoomObserver = new MutationObserver(() => {
-            const next = root.style.getPropertyValue("--zoom-level");
-            if (next === zoom) return;
-            zoom = next;
-            sync();
-          });
-          zoomObserver.observe(root, { attributes: true, attributeFilter: ["style"] });
-          signal.addEventListener("abort", () => zoomObserver.disconnect());
-        }
+      };
+      signal.addEventListener("abort", () => {
+        if (syncFrame !== null) cancelCappedFrame(syncFrame);
+      });
+      window.addEventListener("resize", sync, { signal });
+      // On zoom, Spotify resizes the spacers only once it writes --zoom-level on .Root, after the resize event.
+      const root = document.querySelector<HTMLElement>(".Root");
+      if (root) {
+        // The attribute carries other values too; only a zoom change moves the spacers.
+        let zoom = root.style.getPropertyValue("--zoom-level");
+        const zoomObserver = new MutationObserver(() => {
+          const next = root.style.getPropertyValue("--zoom-level");
+          if (next === zoom) return;
+          zoom = next;
+          sync();
+        });
+        zoomObserver.observe(root, { attributes: true, attributeFilter: ["style"] });
+        signal.addEventListener("abort", () => zoomObserver.disconnect());
+      }
     }
 
     Global.Event.evoke("fullscreen:open", null);
@@ -559,5 +387,4 @@ function Toggle(skipDocumentFullscreen: boolean = false) {
   }
 }
 
-export { CleanupMediaBox };
 export default Fullscreen;
