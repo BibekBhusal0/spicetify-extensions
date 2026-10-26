@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { PopupModal } from "../../Modal.ts";
+import { MarkEscapeDismiss, PopupModal } from "../../Modal.ts";
 import { advancedSection } from "./AdvancedSection.tsx";
 import { appearanceSection } from "./AppearanceSection.tsx";
 import { backgroundSection } from "./BackgroundSection.tsx";
@@ -87,8 +87,6 @@ export default function SettingsPanel() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef(new Map<SectionId, HTMLButtonElement>());
-  const queryRef = useRef(query);
-  queryRef.current = query;
 
   const searching = searchTerms(query).length > 0;
   const hits = searching ? search(query) : [];
@@ -124,11 +122,12 @@ export default function SettingsPanel() {
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        // Keeps Spotify's own Escape shortcut from also firing.
+        // The modal owns the first Escape, whatever has focus. Keeps Spotify's
+        // own Escape shortcut and the fullscreen exit from also firing.
         event.preventDefault();
         event.stopImmediatePropagation();
-        if (queryRef.current) setQuery("");
-        else PopupModal.hide();
+        MarkEscapeDismiss();
+        PopupModal.hide();
         return;
       }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "f") {

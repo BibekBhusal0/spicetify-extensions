@@ -46,7 +46,36 @@ function showMainElement() {
   }
 }
 
+type KeyboardLockApi = {
+  lock?: (keys?: string[]) => Promise<void>;
+  unlock?: () => void;
+};
+
+const keyboardLock = (navigator as Navigator & { keyboard?: KeyboardLockApi }).keyboard;
+
+/* The browser exits fullscreen on Escape itself, before any keydown handler and
+   without letting that handler cancel it. Locking the key while the page is
+   fullscreen makes Escape ours: an open modal closes, and the next press leaves. */
+function lockEscapeKey() {
+  const lock = keyboardLock?.lock;
+  if (!lock) return;
+  try {
+    void lock.call(keyboardLock, ["Escape"]).catch(() => {});
+  } catch {
+    // Keyboard Lock needs fullscreen and is unavailable in some clients.
+  }
+}
+
+function unlockEscapeKey() {
+  try {
+    keyboardLock?.unlock?.();
+  } catch {
+    // Nothing to release when locking was never available.
+  }
+}
+
 export const ExitFullscreenElement = async () => {
+  unlockEscapeKey();
   if (document.fullscreenElement) {
     await document.exitFullscreen();
   }
@@ -62,6 +91,7 @@ export const EnterSpicyLyricsFullscreen = async () => {
     if (!document.fullscreenElement) {
       await document.documentElement.requestFullscreen();
     }
+    lockEscapeKey();
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : String(err);
     console.error(`Fullscreen error: ${errorMessage}`);

@@ -23,6 +23,19 @@ type ModalTransitionOptions = {
 	title?: string | null;
 };
 
+/* An Escape that dismissed a modal must not also leave Spicy Lyrics fullscreen.
+   The page shortcut can run after the modal is already gone, so it checks this
+   instead of trusting the DOM alone. */
+let escapeDismissAt = -Infinity;
+
+export function MarkEscapeDismiss(): void {
+	escapeDismissAt = performance.now();
+}
+
+export function IsEscapeDismissRecent(): boolean {
+	return performance.now() - escapeDismissAt < 300;
+}
+
 class _HTMLGenericModal extends HTMLElement {
 	private _onClose: (() => void) | null;
 	private _currentModalId: string | null;
@@ -168,6 +181,7 @@ class _HTMLGenericModal extends HTMLElement {
 				// Keeps Spotify's own Escape shortcut from also firing.
 				event.preventDefault();
 				event.stopImmediatePropagation();
+				MarkEscapeDismiss();
 				// Follow whatever the close button currently does; transitions rebind it.
 				const closeButton = this.querySelector<HTMLButtonElement>(".sl-modal-close-btn");
 				if (closeButton) closeButton.click();

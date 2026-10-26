@@ -24,6 +24,7 @@ import Global from "./components/Global/Global.ts";
 import Platform from "./components/Global/Platform.ts";
 import Session from "./components/Global/Session.ts";
 import { SpotifyPlayer } from "./components/Global/SpotifyPlayer.ts";
+import { IsEscapeDismissRecent } from "./components/Modal.ts";
 import PageView, { GetPageRoot, PageContainer } from "./components/Pages/PageView.ts";
 import LoadFonts, { ApplyFontPixel } from "./components/Styling/Fonts.ts";
 import { Icons } from "./components/Styling/Icons.ts";
@@ -799,6 +800,8 @@ async function main() {
 
   setTimeout(() => {
     Spicetify.Keyboard.registerImportantShortcut(Spicetify.Keyboard.KEYS.ESCAPE, async () => {
+      if (document.querySelector("sl-generic-modal")) return;
+      if (IsEscapeDismissRecent()) return;
       if (Spicetify.Platform.History.location.pathname !== "/SpicyLyrics") return;
       if (Fullscreen.IsOpen && !(await Fullscreen.Close())) return;
       if (Spicetify.Platform.History.location.pathname === "/SpicyLyrics") {
@@ -814,6 +817,10 @@ async function main() {
 
   document.addEventListener("fullscreenchange", async () => {
     if (!document.fullscreenElement && Fullscreen.IsOpen) {
+      // A modal owns this Escape: closing it must not also drop the page out of
+      // fullscreen. Keyboard Lock normally keeps the browser from exiting at all;
+      // this covers clients where Escape still escapes before we see it.
+      if (document.querySelector("sl-generic-modal") || IsEscapeDismissRecent()) return;
       if (await Fullscreen.Close()) Session.GoBackFrom("/SpicyLyrics");
     }
   });
