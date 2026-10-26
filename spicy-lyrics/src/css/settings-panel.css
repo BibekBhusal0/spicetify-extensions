@@ -42,7 +42,6 @@ sl-generic-modal.SpicyLyricsModal .sl-modal-overlay {
 
   .sl-sp-brand-line,
   .sl-sp-description,
-  .sl-sp-reason,
   .sl-sp-pane-count,
   .sl-sp-tab-count,
   .sl-sp-empty-hint {
@@ -176,8 +175,7 @@ sl-generic-modal.SpicyLyricsModal .sl-modal-overlay {
     font-weight: 600;
   }
 
-  .sl-sp-description,
-  .sl-sp-reason {
+  .sl-sp-description {
     font-size: 12px;
     line-height: 1.45;
   }

@@ -5,23 +5,18 @@ export function Row({
   label,
   description,
   children,
-  disabled,
-  disabledReason,
   stacked,
 }: {
   label: React.ReactNode;
   description?: string;
   children: React.ReactNode;
-  disabled?: boolean;
-  disabledReason?: string;
   stacked?: boolean;
 }) {
   return (
-    <div className={`sl-sp-row${disabled ? " sl-sp-row--disabled" : ""}${stacked ? " sl-sp-row--stacked" : ""}`}>
+    <div className={`sl-sp-row${stacked ? " sl-sp-row--stacked" : ""}`}>
       <div className="sl-sp-label-wrap">
         <span className="sl-sp-label">{label}</span>
         {description && <span className="sl-sp-description">{description}</span>}
-        {disabledReason && <span className="sl-sp-reason">{disabledReason}</span>}
       </div>
       <div className="sl-sp-control">{children}</div>
     </div>

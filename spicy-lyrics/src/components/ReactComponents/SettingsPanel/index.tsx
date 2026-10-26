@@ -2,10 +2,8 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { MarkEscapeDismiss, PopupModal } from "../../Modal.ts";
 import { advancedSection } from "./AdvancedSection.tsx";
 import { appearanceSection } from "./AppearanceSection.tsx";
-import { backgroundSection } from "./BackgroundSection.tsx";
 import { Highlight, Row, SearchBar } from "./components.tsx";
 import { ChevronIcon, CloseIcon } from "./icons.tsx";
-import { interfaceSection } from "./InterfaceSection.tsx";
 import { lyricsSection } from "./LyricsSection.tsx";
 import {
   matchesLabel,
@@ -19,10 +17,8 @@ import { playbackSection } from "./PlaybackSection.tsx";
 
 const SECTIONS: SectionDef[] = [
   lyricsSection,
-  playbackSection,
-  interfaceSection,
-  backgroundSection,
   appearanceSection,
+  playbackSection,
   advancedSection,
 ];
 
@@ -31,25 +27,28 @@ const sectionById = (id: SectionId) => SECTIONS.find((s) => s.id === id) ?? SECT
 // Reopening the panel lands on the tab it was closed on, for the rest of the session.
 let lastTab: SectionId = SECTIONS[0].id;
 
-const notDisabled = () => false as const;
+const alwaysVisible = () => true;
 
-function SettingRow({ def, query }: { def: SettingDef; query: string }) {
-  const useDisabled = def.useDisabled ?? notDisabled;
-  const reason = useDisabled();
+function SettingRow({
+  def,
+  query,
+  showHidden,
+}: {
+  def: SettingDef;
+  query: string;
+  showHidden?: boolean;
+}) {
+  const useVisible = def.useVisible ?? alwaysVisible;
+  const visible = useVisible();
   const label = <Highlight text={def.label} query={query} />;
 
   if (!def.Control) return null;
+  if (!visible && !showHidden) return null;
 
   const Control = def.Control;
   return (
-    <Row
-      label={label}
-      description={def.description}
-      stacked={def.stacked}
-      disabled={!!reason}
-      disabledReason={reason || undefined}
-    >
-      <Control disabled={!!reason} label={def.label} />
+    <Row label={label} description={def.description} stacked={def.stacked}>
+      <Control label={def.label} />
     </Row>
   );
 }
@@ -277,7 +276,7 @@ export default function SettingsPanel() {
                     </button>
                     <div className="sl-sp-card">
                       {settings.map((def) => (
-                        <SettingRow key={def.id} def={def} query={query} />
+                        <SettingRow key={def.id} def={def} query={query} showHidden />
                       ))}
                     </div>
                   </div>

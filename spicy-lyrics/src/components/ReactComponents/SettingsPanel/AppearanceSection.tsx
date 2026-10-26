@@ -2,9 +2,11 @@ import { useStore } from "@nanostores/react";
 import {
   $animationFpsCap,
   $animationFpsCapEnabled,
+  $npvSidebarBehavior,
+  $removeSpotifyLyricsButton,
   $skipSpicyFont,
 } from "../../../utils/stores.ts";
-import { Slider, Toggle } from "./components.tsx";
+import { Select, Slider, Toggle } from "./components.tsx";
 import { AppearanceIcon } from "./icons.tsx";
 import type { GroupDef, SectionDef } from "./model.ts";
 
@@ -46,9 +48,8 @@ const groups: GroupDef[] = [
         label: "Frame Rate",
         keywords: "fps cap animation",
         stacked: true,
-        useDisabled: () =>
-          !useStore($animationFpsCapEnabled) && "Turn on Limit Frame Rate to change this.",
-        Control: ({ disabled, label }) => (
+        useVisible: () => useStore($animationFpsCapEnabled),
+        Control: ({ label }) => (
           <Slider
             label={label}
             value={useStore($animationFpsCap)}
@@ -58,7 +59,37 @@ const groups: GroupDef[] = [
             defaultValue={60}
             unit="FPS"
             onChange={(v) => $animationFpsCap.set(v)}
-            disabled={disabled}
+          />
+        ),
+      },
+    ],
+  },
+  {
+    title: "Spotify UI",
+    settings: [
+      {
+        id: "npvSidebarBehavior",
+        label: "Now Playing View Sidebar",
+        keywords: "npv sidebar queue recommendations",
+        Control: ({ label }) => (
+          <Select
+            label={label}
+            value={useStore($npvSidebarBehavior)}
+            options={["remember", "always-close", "always-open"]}
+            labels={["Remember", "Always Close", "Always Open"]}
+            onChange={(v) => $npvSidebarBehavior.set(v)}
+          />
+        ),
+      },
+      {
+        id: "removeSpotifyLyricsButton",
+        label: "Hide Spotify's Lyrics Button",
+        keywords: "remove playbar",
+        Control: ({ label }) => (
+          <Toggle
+            label={label}
+            checked={useStore($removeSpotifyLyricsButton)}
+            onChange={(v) => $removeSpotifyLyricsButton.set(v)}
           />
         ),
       },

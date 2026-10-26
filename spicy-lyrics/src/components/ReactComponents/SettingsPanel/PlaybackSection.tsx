@@ -77,8 +77,8 @@ const groups: GroupDef[] = [
         label: "Early Scroll Time",
         keywords: "lead ahead",
         stacked: true,
-        useDisabled: () => !useStore($scrollLeadEnabled) && "Turn on Early Scroll to change this.",
-        Control: ({ disabled, label }) => (
+        useVisible: () => useStore($scrollLeadEnabled),
+        Control: ({ label }) => (
           <Slider
             label={label}
             value={useStore($scrollLeadMs)}
@@ -88,7 +88,6 @@ const groups: GroupDef[] = [
             defaultValue={250}
             unit="ms"
             onChange={(v) => $scrollLeadMs.set(v)}
-            disabled={disabled}
           />
         ),
       },

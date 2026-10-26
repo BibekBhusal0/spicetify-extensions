@@ -13,11 +13,12 @@ export interface SettingDef {
   /** Puts the control on its own full-width line under the label (sliders). */
   stacked?: boolean;
   /**
-   * Returns why the row can't be changed right now, or false when it can.
+   * Hides the row while the setting would do nothing. Search still lists it,
+   * because asking for it by name is an explicit request to see it.
    * Called inside the row's own component, so it may use hooks.
    */
-  useDisabled?: () => string | false;
-  Control?: React.FC<{ disabled: boolean; label: string }>;
+  useVisible?: () => boolean;
+  Control?: React.FC<{ label: string }>;
 }
 
 export interface GroupDef {
@@ -25,13 +26,7 @@ export interface GroupDef {
   settings: SettingDef[];
 }
 
-export type SectionId =
-  | "lyrics"
-  | "background"
-  | "playback"
-  | "interface"
-  | "appearance"
-  | "advanced";
+export type SectionId = "lyrics" | "appearance" | "playback" | "advanced";
 
 export interface SectionDef {
   id: SectionId;

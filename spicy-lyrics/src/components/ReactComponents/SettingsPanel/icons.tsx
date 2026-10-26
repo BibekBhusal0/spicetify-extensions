@@ -25,26 +25,11 @@ export const LyricsIcon = (
   </Icon>
 );
 
-export const BackgroundIcon = (
-  <Icon>
-    <rect x="2" y="2.75" width="12" height="10.5" rx="2" />
-    <path d="M2.5 11l3.25-3.25L9 11l1.75-1.75L13.5 12" />
-    <circle cx="10.75" cy="5.75" r="1" />
-  </Icon>
-);
-
 // A stopwatch: the tab holds the sync offset and scroll timing.
 export const PlaybackIcon = (
   <Icon>
     <circle cx="8" cy="9" r="5" />
     <path d="M8 6.75V9l1.5 1M6.5 1.75h3M8 1.75V4" />
-  </Icon>
-);
-
-export const InterfaceIcon = (
-  <Icon>
-    <rect x="2" y="2.75" width="12" height="10.5" rx="2" />
-    <path d="M6 2.75v10.5" />
   </Icon>
 );
 
