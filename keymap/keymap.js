@@ -378,17 +378,16 @@ function VimBind() {
 		let firstKey = 0;
 		let secondKey = 0;
 
+		const baseFragment = document.DocumentFragment ? document.createDocumentFragment() : document.createElement("div");
+		const tippyFragment = document.DocumentFragment ? document.createDocumentFragment() : document.createElement("div");
+
 		for (const e of getLinks()) {
-			const computed = window.getComputedStyle(e);
-			if (computed.display === "none" || computed.visibility === "hidden" || computed.opacity === "0") {
+			if (e.offsetParent === null) {
 				continue;
 			}
 
 			const bound = e.getBoundingClientRect();
 			const owner = document.body;
-
-			let top = bound.top;
-			let left = bound.left;
 
 			if (
 				bound.bottom > owner.clientHeight ||
@@ -401,15 +400,21 @@ function VimBind() {
 				continue;
 			}
 
+			let top = bound.top;
+			let left = bound.left;
+
 			if (e.parentNode.role !== "row") {
 				top = top + bound.height / 2 - 15;
 				left = left + bound.width / 2 - 15;
 			}
 
+			const keyText = keyList[firstKey] + keyList[secondKey];
+			const keyElement = createKey(e, keyText, top, left);
+
 			if (e.tagName === "BUTTON" && e.parentNode.tagName === "LI") {
-				tippyOverlay.append(createKey(e, keyList[firstKey] + keyList[secondKey], top, left));
+				tippyFragment.append(keyElement);
 			} else {
-				baseOverlay.append(createKey(e, keyList[firstKey] + keyList[secondKey], top, left));
+				baseFragment.append(keyElement);
 			}
 
 			secondKey++;
@@ -418,6 +423,9 @@ function VimBind() {
 				firstKey++;
 			}
 		}
+
+		baseOverlay.append(baseFragment);
+		tippyOverlay.append(tippyFragment);
 
 		this.isActive = true;
 		setTimeout(() => {
