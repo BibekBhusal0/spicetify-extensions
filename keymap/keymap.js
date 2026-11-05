@@ -230,12 +230,16 @@
 		setTimeout(kill, 80);
 	}
 
-	// re-render vim on window resize & prevent mouse event while active
+	// re-render vim on window resize (debounced via requestAnimationFrame) & prevent mouse event while active
+	let resizeRAF = null;
 	window.addEventListener(
 		"resize",
 		(event) => {
 			if (vim.isActive) {
-				vim.activate();
+				if (resizeRAF) cancelAnimationFrame(resizeRAF);
+				resizeRAF = requestAnimationFrame(() => {
+					vim.activate();
+				});
 			}
 		},
 		true
